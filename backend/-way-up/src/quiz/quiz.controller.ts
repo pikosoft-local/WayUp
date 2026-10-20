@@ -16,7 +16,6 @@ import { ParseAnswersPipe } from './pipes/parse-answers.pipe';
 import { QuizResultsService } from './quiz-results.service';
 import { QuizService } from './quiz.service';
 import { QuizAnswers, QuizSuccessResponse} from './quiz.types';
-import { request } from 'node:http';
 
 @Controller()
 @UseGuards(AuthGuard)
