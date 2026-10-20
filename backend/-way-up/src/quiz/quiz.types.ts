@@ -6,6 +6,7 @@ export interface QuizSuccessResponse {
   ok: true;
   result: string;
   requestId: string;
+  saved: boolean;
 }
 
 export interface QuizErrorResponse {
