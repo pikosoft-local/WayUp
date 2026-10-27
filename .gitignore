@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -228,3 +229,5 @@ node_modules
 dist
 .env
 >>>>>>> 8d72b1a6f072958c87956e889988b6748c5b9fd2
+=======
+>>>>>>> 2213faeb65017f4866ae5bcdf0e1bc00c29c5fed

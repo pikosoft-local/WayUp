@@ -10,7 +10,12 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@nestjs/config": "^4.0.0",
+=======
+    "@nestjs/config": "^12.0.1",
+    "@supabase/supabase-js": "^2.118.0",
+>>>>>>> 2213faeb65017f4866ae5bcdf0e1bc00c29c5fed
     "cors": "^2.8.6",
     "dotenv": "^18.0.2",
     "groq-sdk": "^1.6.0",
