@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
@@ -222,3 +223,8 @@ __marimo__/
 
 .env
 backend/.env
+=======
+node_modules
+dist
+.env
+>>>>>>> 8d72b1a6f072958c87956e889988b6748c5b9fd2
