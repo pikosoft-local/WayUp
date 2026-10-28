@@ -1,170 +1,61 @@
 import React from "react";
+import {
+  Checkbox,
+  FormControl,
+  FormControlLabel,
+  FormGroup,
+  FormLabel,
+  Radio,
+  RadioGroup,
+  TextField,
+} from "@mui/material";
 
-import Radio from "@mui/material/Radio";
-import RadioGroup from "@mui/material/RadioGroup";
-import FormControlLabel from "@mui/material/FormControlLabel";
-import FormControl from "@mui/material/FormControl";
-import FormLabel from "@mui/material/FormLabel";
-
-import FormGroup from "@mui/material/FormGroup";
-import Checkbox from "@mui/material/Checkbox";
-
-import Stack from "@mui/material/Stack";
-
-import TextField from "@mui/material/TextField";
-
-const textFieldSx = {
-  "& .MuiInputBase-root": {
-    fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
-    paddingTop: "8px",
-    paddingBottom: "8px",
-  },
-  "& .MuiInputLabel-root": {
-    fontSize: { xs: "1.2rem", sm: "1.5rem", md: "1.8rem" },
-  },
-  "& .MuiInputLabel-shrink": {
-    transform: "translate(0, -1.5px) scale(0.75)",
-  },
-};
-
-function TextQuestion({ label, value, onChange }) {
+function TextQuestion({ label, value, onChange, placeholder = "Nie musisz mieć gotowej odpowiedzi" }) {
   const id = React.useId();
+
   return (
-    <FormControl className="FormControl">
-      <FormLabel id={`${id}-label`} className="FormLabel">
+    <FormControl className="question-form">
+      <FormLabel id={`${id}-label`} className="question-label">
         {label}
       </FormLabel>
-      <div
-        className="TextFields"
-        style={{ width: "100%", padding: "0 16px", boxSizing: "border-box" }}
-      >
-        <TextField
-          id={`${id}-input`}
-          label=""
-          multiline
-          maxRows={4}
-          variant="standard"
-          fullWidth
-          placeholder="Wpisz tutaj"
-          value={value ?? ""}
-          onChange={(e) => onChange(e.target.value)}
-          sx={textFieldSx}
-        />
-      </div>
-    </FormControl>
-  );
-}
-
-function Q_1({ value, onChange }) {
-  const id = React.useId();
-  return (
-    <FormControl className="FormControl">
-      <FormLabel id={`${id}-label`} className="FormLabel">
-        Gdzie jesteś teraz?
-      </FormLabel>
-
-      <RadioGroup
-        className="RadioGroup"
+      <TextField
+        id={`${id}-input`}
         aria-labelledby={`${id}-label`}
-        name="radio-buttons-group"
+        className="question-text"
+        multiline
+        minRows={3}
+        maxRows={5}
+        fullWidth
+        slotProps={{ htmlInput: { maxLength: 500 } }}
+        placeholder={placeholder}
         value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <FormControlLabel
-          value="Szkoła_podstawowa"
-          control={<Radio id="radio" />}
-          label="Szkoła podstawowa"
-        />
-        <FormControlLabel
-          value="Liceum_technikum"
-          control={<Radio id="radio" />}
-          label="Liceum / technikum"
-        />
-        <FormControlLabel value="Studia" control={<Radio id="radio" />} label="Studia" />
-        <FormControlLabel
-          value="Chcę_się_przebranżowić"
-          control={<Radio id="radio" />}
-          label="Chcę się przebranżowić"
-        />
-        <FormControlLabel
-          value="Jeszcze_nie_wiem"
-          control={<Radio id="radio" />}
-          label="Jeszcze nie wiem"
-        />
-      </RadioGroup>
+        onChange={(event) => onChange(event.target.value)}
+      />
+      <span className="question-hint">Możesz odpowiedzieć krótko — do 500 znaków.</span>
     </FormControl>
-  );
-}
-
-function Q_2({ value, onChange }) {
-  const id = React.useId();
-  const selected = Array.isArray(value) ? value : [];
-
-  const toggle = (label) => {
-    if (selected.includes(label)) {
-      onChange(selected.filter((v) => v !== label));
-    } else {
-      onChange([...selected, label]);
-    }
-  };
-
-  const options = [
-    ["Symulatory", "Gry logiczne", "Akcji", "RPG"],
-    ["Strategie", "Sportowe", "Survival", "Horrory"],
-  ];
-
-  return (
-    <FormGroup>
-      <FormControl className="FormControl">
-        <FormLabel id={`${id}-label`} className="FormLabel">
-          W co grałeś jako dziecko?
-        </FormLabel>
-        <FormGroup className="CheckBoxGroup">
-          <Stack spacing={2} direction="row">
-            {options.map((col, colIndex) => (
-              <Stack key={colIndex}>
-                {col.map((label) => (
-                  <FormControlLabel
-                    key={label}
-                    control={
-                      <Checkbox
-                        checked={selected.includes(label)}
-                        onChange={() => toggle(label)}
-                      />
-                    }
-                    label={label}
-                  />
-                ))}
-              </Stack>
-            ))}
-          </Stack>
-        </FormGroup>
-      </FormControl>
-    </FormGroup>
   );
 }
 
 function RadioQuestion({ label, options, value, onChange }) {
   const id = React.useId();
+
   return (
-    <FormControl className="FormControl">
-      <FormLabel id={`${id}-label`} className="FormLabel">
+    <FormControl className="question-form">
+      <FormLabel id={`${id}-label`} className="question-label">
         {label}
       </FormLabel>
-
       <RadioGroup
-        className="RadioGroup"
         aria-labelledby={`${id}-label`}
-        name="radio-buttons-group"
+        className="answer-options"
         value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(event) => onChange(event.target.value)}
       >
-        {options.map((opt) => (
+        {options.map((option) => (
           <FormControlLabel
-            key={opt}
-            value={opt}
-            control={<Radio id="radio" />}
-            label={opt}
+            key={option}
+            value={option}
+            control={<Radio />}
+            label={option}
           />
         ))}
       </RadioGroup>
@@ -172,185 +63,336 @@ function RadioQuestion({ label, options, value, onChange }) {
   );
 }
 
-function Q_3({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Wolisz ludzi czy komputery?"
-      options={["ludzi", "komputery", "Nic", "Obydwa"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_4({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Morze czy góry?"
-      options={["Morze", "Góry", "Nic", "Obydwa"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_5({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Miasto czy natura?"
-      options={["Miasto", "Natura", "Nic", "Obydwa"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_6({ value, onChange }) {
-  return (
-    <TextQuestion
-      label="Co robisz w wolnym czasie?"
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_7({ value, onChange }) {
-  return (
-    <TextQuestion
-      label="Co potrafisz robić godzinami?"
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_8({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Co szybko Cię nudzi?"
-      options={["Strasznie_szybko", "Szybko", "średnio", "Wolno", "Bardzo_Wolno"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_9({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Wolisz tworzyć czy analizować?"
-      options={["Tworzyć", "Analizować", "Obydwa", "Nic"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_10({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Wolisz działać czy planować?"
-      options={["Działać", "Planować", "Obydwa", "Nic"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-
-function Q_11({ value, onChange }) {
-  return (
-    <RadioQuestion
-      label="Wolisz rywalizację czy współpracę?"
-      options={["Rywalizacja", "Współpraca", "Obydwa", "Nic"]}
-      value={value}
-      onChange={onChange}
-    />
-  );
-}
-function TwoColumnRadioQuestion({ label, value, onChange }) {
+function MultiSelectQuestion({ label, options, value, onChange }) {
   const id = React.useId();
-  const left = ["Matematyka", "Język Polski", "Język angielski", "Geografia", "żaden"];
-  const right = ["WF", "Biologia", "Fizyka", "Chemia", "Inny"];
+  const selected = Array.isArray(value) ? value : [];
+
+  function toggle(option) {
+    onChange(
+      selected.includes(option)
+        ? selected.filter((item) => item !== option)
+        : [...selected, option],
+    );
+  }
 
   return (
-    <FormControl className="FormControl">
-      <FormLabel id={`${id}-label`} className="FormLabel">
+    <FormControl className="question-form">
+      <FormLabel id={`${id}-label`} className="question-label">
         {label}
       </FormLabel>
-
-      <RadioGroup
-        className="RadioGroup"
-        aria-labelledby={`${id}-label`}
-        name="radio-buttons-group"
-        value={value ?? ""}
-        onChange={(e) => onChange(e.target.value)}
-      >
-        <Stack direction={"row"}>
-          <Stack direction={"column"}>
-            {left.map((opt) => (
-              <FormControlLabel key={opt} value={opt} control={<Radio id="radio" />} label={opt} />
-            ))}
-          </Stack>
-          <Stack direction={"column"}>
-            {right.map((opt) => (
-              <FormControlLabel key={opt} value={opt} control={<Radio id="radio" />} label={opt} />
-            ))}
-          </Stack>
-        </Stack>
-      </RadioGroup>
+      <FormGroup aria-labelledby={`${id}-label`} className="answer-options answer-grid">
+        {options.map((option) => (
+          <FormControlLabel
+            key={option}
+            control={
+              <Checkbox checked={selected.includes(option)} onChange={() => toggle(option)} />
+            }
+            label={option}
+          />
+        ))}
+      </FormGroup>
+      <span className="question-hint">Możesz zaznaczyć kilka odpowiedzi.</span>
     </FormControl>
   );
 }
 
-function Q_12({ value, onChange }) {
+function Q_1(props) {
   return (
-    <TwoColumnRadioQuestion
-      label="Jaki przedmiot lubiłeś w szkole?"
-      value={value}
-      onChange={onChange}
+    <RadioQuestion
+      {...props}
+      label="Na jakim etapie edukacji jesteś?"
+      options={[
+        "Szkoła podstawowa",
+        "Liceum",
+        "Technikum",
+        "Szkoła branżowa",
+        "Studia lub przerwa po szkole",
+        "Inny etap",
+      ]}
     />
   );
 }
 
-function Q_13({ value, onChange }) {
+function Q_2(props) {
   return (
-    <TwoColumnRadioQuestion
-      label="Jaki przedmiot omijałbyś z daleka?"
-      value={value}
-      onChange={onChange}
+    <MultiSelectQuestion
+      {...props}
+      label="Które zadania brzmią dla Ciebie najbardziej naturalnie?"
+      options={[
+        "Rozgryźć trudną zagadkę",
+        "Zbudować albo naprawić coś",
+        "Wymyślić coś kreatywnego",
+        "Pomóc komuś ogarnąć problem",
+        "Zorganizować ludzi i plan",
+        "Wyszukać i porównać informacje",
+        "Przekonać innych do pomysłu",
+        "Zrobić coś w terenie",
+      ]}
     />
   );
 }
 
-function Q_14({ value, onChange }) {
-  return <TextQuestion label="Co chciałbyś umieć?" value={value} onChange={onChange} />;
-}
-
-function Q_15({ value, onChange }) {
-  return <TextQuestion label="Gdzie chciałbyś pracować?" value={value} onChange={onChange} />;
-}
-
-function Q_16({ value, onChange }) {
-  return <TextQuestion label="Jaki zawód Cię ciekawi?" value={value} onChange={onChange} />;
-}
-
-function Q_17({ value, onChange }) {
-  return <TextQuestion label="Jaka gra Cię opisuje?" value={value} onChange={onChange} />;
-}
-
-function Q_18({ value, onChange }) {
+function Q_3(props) {
   return (
-    <TextQuestion label="czym by się zajmowała twoja firma?" value={value} onChange={onChange} />
+    <RadioQuestion
+      {...props}
+      label="Kiedy czujesz największą satysfakcję?"
+      options={[
+        "Gdy coś działa dzięki mnie",
+        "Gdy ktoś poczuje się lepiej",
+        "Gdy mam pomysł, którego nie było",
+        "Gdy rozumiem, jak coś działa",
+        "Gdy domykam konkretny cel",
+        "Gdy jeszcze tego nie wiem",
+      ]}
+    />
   );
 }
 
-function Q_19({ value, onChange }) {
-  return <TextQuestion label="Co najczęściej googlujesz?" value={value} onChange={onChange} />;
+function Q_4(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Dostajesz nowe zadanie bez instrukcji. Co robisz najpierw?"
+      options={[
+        "Zaczynam testować i uczę się po drodze",
+        "Rozpisuję plan krok po kroku",
+        "Szukam przykładu albo pytam kogoś",
+        "Najpierw sprawdzam, jaki ma być efekt",
+        "Wymyślam kilka możliwych rozwiązań",
+      ]}
+    />
+  );
 }
 
-function Q_20({ value, onChange }) {
-  return <TextQuestion label="Jaki kanał na YouTube oglądasz?" value={value} onChange={onChange} />;
+function Q_5(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Co najchętniej bierzesz na warsztat?"
+      options={[
+        "Relacje i potrzeby ludzi",
+        "Pomysły, teksty i obrazy",
+        "Dane, liczby i zależności",
+        "Technologię i urządzenia",
+        "Rzeczy, które można zrobić rękami",
+        "Różne tematy — zależy od dnia",
+      ]}
+    />
+  );
+}
+
+function Q_6(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="Co robisz w wolnym czasie tak, że tracisz poczucie czasu?"
+      placeholder="Np. montuję filmiki, trenuję, składam komputery, czytam o kosmosie…"
+    />
+  );
+}
+
+function Q_7(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="Z czym znajomi najczęściej przychodzą właśnie do Ciebie?"
+      placeholder="Może proszą Cię o radę, pomoc techniczną, pomysł albo dobrą organizację?"
+    />
+  );
+}
+
+function Q_8(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Jak czujesz się, gdy trzeba szybko opanować coś nowego?"
+      options={[
+        "Lubię wskoczyć na głęboką wodę",
+        "Próbuję, jeśli mam dobry przykład",
+        "Wolę spokojnie rozłożyć temat na części",
+        "Potrzebuję chwili, żeby się przekonać",
+      ]}
+    />
+  );
+}
+
+function Q_9(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Wolisz pracę, w której…"
+      options={[
+        "Wymyślasz nowe rozwiązania",
+        "Dopracowujesz szczegóły i jakość",
+        "Szukasz przyczyn i wyciągasz wnioski",
+        "Rozmawiasz i wspierasz innych",
+        "Łączysz kilka różnych zadań",
+      ]}
+    />
+  );
+}
+
+function Q_10(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Który rytm pracy najbardziej Ci pasuje?"
+      options={[
+        "Dużo zmian i szybkie działanie",
+        "Jasny plan i przewidywalne kroki",
+        "Samodzielność i własne tempo",
+        "Wspólny cel i częsty kontakt z ludźmi",
+        "Jeszcze nie wiem",
+      ]}
+    />
+  );
+}
+
+function Q_11(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="W projekcie grupowym zwykle jesteś osobą, która…"
+      options={[
+        "Wpada na pomysł",
+        "Układa plan i pilnuje terminów",
+        "Robi konkretną część zadania",
+        "Dba o komunikację i dobrą atmosferę",
+        "Sprawdza, czy wszystko działa",
+        "Zależy od projektu",
+      ]}
+    />
+  );
+}
+
+function Q_12(props) {
+  return (
+    <MultiSelectQuestion
+      {...props}
+      label="Które tematy naprawdę Cię ciekawią?"
+      options={[
+        "Technologia i programowanie",
+        "Zdrowie i psychologia",
+        "Sztuka, film i design",
+        "Biznes i nowe pomysły",
+        "Przyroda i klimat",
+        "Sport i aktywność",
+        "Nauka i eksperymenty",
+        "Media, języki i komunikacja",
+        "Prawo i sprawy społeczne",
+        "Rzemiosło i praca praktyczna",
+      ]}
+    />
+  );
+}
+
+function Q_13(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Co najbardziej odbiera Ci energię?"
+      options={[
+        "Powtarzanie ciągle tego samego",
+        "Brak jasnego celu",
+        "Długie siedzenie bez ruchu",
+        "Ciągłe rozmowy i hałas",
+        "Presja czasu",
+        "Każdy dzień jest inny — trudno wybrać",
+      ]}
+    />
+  );
+}
+
+function Q_14(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="Jakiej umiejętności chciał(a)byś się nauczyć w najbliższym roku?"
+      placeholder="Nie musi to być coś związanego z konkretnym zawodem."
+    />
+  );
+}
+
+function Q_15(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="W jakim miejscu najłatwiej wyobrazić Ci sobie dobrą pracę?"
+      options={[
+        "Biuro albo praca zdalna",
+        "Pracownia, studio lub laboratorium",
+        "Warsztat albo praca techniczna",
+        "Szkoła, szpital lub miejsce pomocy innym",
+        "W terenie, w ruchu",
+        "Jeszcze nie mam wyobrażenia",
+      ]}
+    />
+  );
+}
+
+function Q_16(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Jaki efekt swojej pracy chciał(a)byś widzieć?"
+      options={[
+        "Ktoś rozwiązał swój problem",
+        "Powstała rzecz, której wcześniej nie było",
+        "Coś działa szybciej albo lepiej",
+        "Ludzie lepiej się rozumieją",
+        "Mam konkretny wynik i poczucie postępu",
+        "Nie wiem — chcę różnych doświadczeń",
+      ]}
+    />
+  );
+}
+
+function Q_17(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="Jaki mały projekt albo wydarzenie chętnie byś stworzył(a)?"
+      placeholder="Np. szkolny podcast, turniej, aplikację, zbiórkę, własną markę…"
+    />
+  );
+}
+
+function Q_18(props) {
+  return (
+    <RadioQuestion
+      {...props}
+      label="Co najbardziej liczy się dla Ciebie w przyszłej pracy?"
+      options={[
+        "Stabilność i poczucie bezpieczeństwa",
+        "Swoboda i niezależność",
+        "Dobre zarobki",
+        "Kreatywność i rozwój",
+        "Pomaganie ludziom lub zmienianie świata",
+        "Fajny zespół i dobra atmosfera",
+      ]}
+    />
+  );
+}
+
+function Q_19(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="O jakim temacie ostatnio najchętniej oglądasz, czytasz albo googlujesz?"
+      placeholder="Wpisz temat, który sam z siebie przyciąga Twoją uwagę."
+    />
+  );
+}
+
+function Q_20(props) {
+  return (
+    <TextQuestion
+      {...props}
+      label="Jaki pierwszy krok możesz zrobić, żeby sprawdzić, czy ten kierunek Ci pasuje?"
+      placeholder="Np. obejrzeć dzień z życia…, pogadać z…, zrobić mini-projekt…"
+    />
+  );
 }
 
 export {

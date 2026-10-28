@@ -1,24 +1,26 @@
-import { useState } from "react";
-
+import { lazy, Suspense } from "react";
 import "./App.css";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
-
+import { AuthProvider } from "./auth/AuthProvider";
 import ChooseYourDestination from "./scenes/chooseYourDestination";
-import MeetYou from './scenes/meetYou';
+
+const MeetYou = lazy(() => import("./scenes/meetYou"));
+const Account = lazy(() => import("./scenes/account"));
 
 function App() {
   return (
-    
-      <BrowserRouter>
-      
-        <Routes>
-          <Route path="/" element={<ChooseYourDestination />} />
-          <Route path="/meetYou" element={<MeetYou />} />
-         
-        </Routes>
-      </BrowserRouter>
-    
+    <BrowserRouter>
+      <AuthProvider>
+        <Suspense fallback={<main className="loading-page" aria-label="Ładowanie" />}>
+          <Routes>
+            <Route path="/" element={<ChooseYourDestination />} />
+            <Route path="/meetYou" element={<MeetYou />} />
+            <Route path="/konto" element={<Account />} />
+          </Routes>
+        </Suspense>
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
