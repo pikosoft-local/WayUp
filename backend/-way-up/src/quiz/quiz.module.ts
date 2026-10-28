@@ -1,12 +1,13 @@
 import { Module } from '@nestjs/common';
-import { AuthGuard } from '../auth/auth.guard';
-import { GroqService } from './groq.service';
+import { AiModule } from '../ai/ai.module';
+import { ProfileService } from '../profile/profile.service';
+import { ResultsModule } from '../results/results.module';
 import { QuizController } from './quiz.controller';
-import { QuizResultsService } from './quiz-results.service'
 import { QuizService } from './quiz.service';
 
 @Module({
-    controllers: [QuizController],
-    providers: [QuizService, GroqService, QuizResultsService, AuthGuard],
+  imports: [AiModule, ResultsModule],
+  controllers: [QuizController],
+  providers: [QuizService, ProfileService],
 })
 export class QuizModule {}
