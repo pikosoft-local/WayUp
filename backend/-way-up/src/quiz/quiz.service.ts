@@ -1,29 +1,43 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { GroqService } from './groq.service';
-import { EXPECTED_SENTENCES, MAX_RETRIES } from './quiz.constants';
-import { QuizAnswers } from './quiz.types';
-import { countSentences } from './quiz.utils';
+import { GroqService } from '../ai/groq.service';
+import { EXPECTED_SENTENCES, MAX_RETRIES, SYSTEM_PROMPT } from './quiz.constants';
+import { QuizSubmission } from './quiz.types';
+import { countSentences, formatSubmission } from './quiz.utils';
 
 @Injectable()
 export class QuizService {
-    private readonly logger = new Logger(QuizService.name);
+  private readonly logger = new Logger(QuizService.name);
 
-    constructor(private readonly groq: GroqService) {}
+  constructor(private readonly groq: GroqService) {}
 
-    async generateAdvice(answers: QuizAnswers, requestId: string): Promise<string> {
-        let result = await this.groq.generateAdvice(answers);
+  async generateAdvice(submission: QuizSubmission, requestId: string): Promise<string> {
+    const userPrompt =
+      `Oto odpowiedzi użytkownika z quizu zawodowego:\n\n${formatSubmission(submission)}\n\n` +
+      `Na tej podstawie napisz spersonalizowaną sugestię dalszej ścieżki zawodowej/edukacyjnej, ` +
+      `zgodnie z zasadami stylu z instrukcji systemowej.`;
 
-        for (
-            let attempt = 1;
-            countSentences(result) !== EXPECTED_SENTENCES && attempt <= MAX_RETRIES;
-            attempt++
-        ) {
-            this.logger.warn(
-                `[${requestId}] Zła liczba zdań (${countSentences(result)}), ponawiam ${attempt}/${MAX_RETRIES}`,
-            );
-            result = await this.groq.generateAdvice(answers);
-        }
+    const ask = () =>
+      this.groq.complete(
+        [
+          { role: 'system', content: SYSTEM_PROMPT },
+          { role: 'user', content: userPrompt },
+        ],
+        { temperature: 0.85, maxTokens: 2000 },
+      );
 
-        return result;
+    let result = await ask();
+
+    for (
+      let attempt = 1;
+      countSentences(result) !== EXPECTED_SENTENCES && attempt <= MAX_RETRIES;
+      attempt++
+    ) {
+      this.logger.warn(
+        `[${requestId}] Zła liczba zdań (${countSentences(result)}), ponawiam ${attempt}/${MAX_RETRIES}`,
+      );
+      result = await ask();
     }
+
+    return result;
+  }
 }
