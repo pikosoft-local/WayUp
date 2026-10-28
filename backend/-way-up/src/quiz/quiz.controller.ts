@@ -1,4 +1,5 @@
 import {
+<<<<<<< HEAD
   Body,
   Controller,
   HttpCode,
@@ -7,6 +8,17 @@ import {
   Logger,
   Post,
   UseGuards,
+=======
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    InternalServerErrorException,
+    Logger,
+    Post,
+    UseGuards,
+>>>>>>> 5efc24a14b9399c26500a4880e932096c26f1ef8
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { AuthGuard } from '../auth/auth.guard';
@@ -31,6 +43,7 @@ export class QuizController {
     private readonly results: ResultsRepository,
   ) {}
 
+<<<<<<< HEAD
   @Post('SendHandler')
   @HttpCode(HttpStatus.OK)
   async sendHandler(
@@ -57,6 +70,45 @@ export class QuizController {
         ok: false,
         error: 'Nie udało się wygenerować odpowiedzi.',
       });
+=======
+    @Post('SendHandler')
+    @HttpCode(HttpStatus.OK)
+    async sendHandler(
+        @Body(ParseAnswersPipe) answers: QuizAnswers,
+        @CurrentUser() user: AuthUser,
+    ): Promise<QuizSuccessResponse> {
+        const requestId = randomUUID();
+        this.logger.log(`[${requestId}] user=${user.id} quiz submitted`);
+
+        let result: string
+        try {
+            result = await this.quizService.generateAdvice(answers, requestId);
+        } catch (err) {
+            this.logger.error(
+                `[${requestId}] ${err instanceof Error ? err.message : String(err)}`,
+                err instanceof Error ? err.stack : undefined,
+            );
+            throw new InternalServerErrorException({
+                ok: false,
+                error: 'Nie udało się wygenerować odpowiedzi',
+            });
+        }
+
+        await this.quizResults.save({
+            requestId,
+            userId: user.id,
+            answers,
+            result,
+        });
+
+        return { ok: true, result, requestId, saved: true };
+    }
+
+    @Get('quiz-results')
+    async getResults(@CurrentUser() user: AuthUser) {
+        const results = await this.quizResults.listForUser(user.id);
+        return { ok: true, results };
+>>>>>>> 5efc24a14b9399c26500a4880e932096c26f1ef8
     }
 
     const saved = await this.results.insert({

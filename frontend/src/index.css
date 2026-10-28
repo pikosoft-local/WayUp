@@ -1,0 +1,11 @@
+@import "@fontsource/roboto/400.css";
+@import "@fontsource/roboto/500.css";
+@import "@fontsource/roboto/700.css";
+
+body {
+  font-family: Roboto, "Segoe UI", sans-serif;
+}
+
+#root {
+  min-height: 100vh;
+}

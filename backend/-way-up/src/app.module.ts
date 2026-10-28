@@ -9,6 +9,7 @@ import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
+<<<<<<< HEAD
     ConfigModule.forRoot({ isGlobal: true }),
     SupabaseModule,
     AiModule,
@@ -16,6 +17,11 @@ import { SupabaseModule } from './supabase/supabase.module';
     QuizModule,
     ResultsModule,
     MentorModule,
+=======
+    ConfigModule.forRoot({ isGlobal: true, envFilePath: ['../.env', '.env'] }),
+    SupabaseModule,
+    QuizModule,
+>>>>>>> 5efc24a14b9399c26500a4880e932096c26f1ef8
   ],
 })
 export class AppModule {}
