@@ -21,12 +21,14 @@ Zawsze `{ "ok": false, "error": "komunikat PL" }`.
 | 404 | nie ma zasobu lub nie należy do użytkownika | pokaż `error` |
 | 429 | limit wiadomości do mentora (50 na wynik) | pokaż `error` |
 | 500 | błąd generowania AI / bazy | pokaż `error`, pozwól ponowić |
+| 503 | niedostępna wyszukiwarka lub brak konfiguracji aktualności | pokaż `error`, pozwól ponowić |
 
 ## Endpointy
 
 | | Endpoint | Opis |
 |---|---|---|
 | | `GET /questions` | pytania quizu |
+| | `GET /news` | niepolityczne aktualności dla młodych, streszczone przez AI |
 | 🔒 | `POST /questions/follow-up` | pytanie dodatkowe od AI (opcjonalne) |
 | 🔒 | `POST /SendHandler` | wysłanie quizu → porada + profil |
 | 🔒 | `GET /results` | lista moich wyników |
@@ -41,6 +43,33 @@ Zawsze `{ "ok": false, "error": "komunikat PL" }`.
 | 🔒 | `POST /results/:id/chat` | wiadomość do mentora |
 
 `:id` to UUID (`requestId` z `SendHandler`).
+
+## Aktualności – `GET /news`
+
+Publiczny endpoint pobiera świeże wpisy z kanałów RSS serwisów edukacyjnych i technologicznych, a Groq tworzy na ich podstawie krótkie omówienia. Backend zachowuje link do oryginalnego źródła; tematy polityczne są odrzucane przed i po generowaniu. Wynik jest buforowany przez godzinę. Odwiedzający stronę nie potrzebują klucza wyszukiwarki ani własnej konfiguracji.
+
+Wymagany jest wyłącznie skonfigurowany po stronie serwera `GROQ_API_KEY`. Groq nie przegląda sieci samodzielnie — wbudowany system web search Compound został wycofany 21 września 2026 r.; backend dostarcza mu dane z kanałów RSS.
+
+Odpowiedź:
+
+```json
+{
+  "ok": true,
+  "articles": [
+    {
+      "id": "https://example.com/artykul",
+      "title": "Tytuł artykułu",
+      "excerpt": "Krótki wstęp",
+      "content": "Treść pierwszego akapitu.\n\nTreść kolejnego akapitu.",
+      "category": "Edukacja",
+      "sourceTitle": "Tytuł materiału źródłowego",
+      "sourceName": "Perspektywy",
+      "sourceUrl": "https://example.com/artykul",
+      "publishedAt": "2026-10-29T10:00:00.000Z"
+    }
+  ]
+}
+```
 
 ## Pytania – `GET /questions`
 
