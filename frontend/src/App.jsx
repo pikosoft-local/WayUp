@@ -7,6 +7,7 @@ import ChooseYourDestination from "./scenes/chooseYourDestination";
 
 const MeetYou = lazy(() => import("./scenes/meetYou"));
 const Account = lazy(() => import("./scenes/account"));
+const Share = lazy(() => import("./scenes/share"));
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
             <Route path="/" element={<ChooseYourDestination />} />
             <Route path="/meetYou" element={<MeetYou />} />
             <Route path="/konto" element={<Account />} />
+            <Route path="/share/:token" element={<Share />} />
           </Routes>
         </Suspense>
       </AuthProvider>
