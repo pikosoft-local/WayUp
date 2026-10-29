@@ -4,6 +4,11 @@ import { defineConfig } from 'vite'
 
 // https://vite.dev/config/
 export default defineConfig({
+  css: {
+    postcss: {
+      plugins: [],
+    },
+  },
   plugins: [
     react(),
     babel({ presets: [reactCompilerPreset()] })
