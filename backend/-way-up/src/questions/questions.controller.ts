@@ -17,7 +17,9 @@ export class QuestionsController {
   constructor(private readonly questions: QuestionsService) {}
 
   @Get()
-  list() {
+  async list() {
+    const dynamic = await this.questions.generateDynamicQuestions();
+    const allQuestions = [...QUESTION_BANK.filter((q) => q.block === 1), ...dynamic];
     return {
       ok: true,
       version: QUESTIONS_VERSION,
@@ -26,7 +28,7 @@ export class QuestionsController {
       blocks: BLOCKS.map((block) => ({
         id: block.id,
         title: block.title,
-        questions: QUESTION_BANK.filter((q) => q.block === block.id).map(
+        questions: allQuestions.filter((q) => q.block === block.id).map(
           ({ id, type, text, options, minLabel, maxLabel }) => ({
             id,
             type,
@@ -44,7 +46,12 @@ export class QuestionsController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   async followUp(@Body(ParseSubmissionPipe) submission: QuizSubmission) {
-    const question = await this.questions.generateFollowUp(submission);
+    const alreadyAsked = Array.isArray(submission.followUps)
+      ? submission.followUps.map((item) => item.question).filter(Boolean)
+      : [];
+    const question = await this.questions.generateFollowUp(submission, alreadyAsked);
     return { ok: true, question };
   }
 }
+
+
