@@ -54,7 +54,7 @@ const team = [
     role: "Frontendowiec",
     description:
       "Przekłada pomysły wayUp na doświadczenie, z którego młodym po prostu dobrze się korzysta.",
-    photoLabel: "Miejsce na zdjęcie Pawła Gilewicza",
+    photoLabel: "Portret Pawła Gilewicza",
   },
   {
     initials: "JZ",

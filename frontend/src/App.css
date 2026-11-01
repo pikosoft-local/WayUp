@@ -2837,12 +2837,22 @@ html::-webkit-scrollbar-thumb {
   background: #241910;
 }
 
-.member-photo,
-.team-card-2 .member-photo {
+.team-card-1 .member-photo {
+  min-height: clamp(280px, 34vw, 360px);
   background:
-    linear-gradient(180deg, rgba(36, 23, 12, 0.12), rgba(36, 23, 12, 0.55)),
-    url("./assets/goldminingstart.jpg") center 44% / cover,
+    linear-gradient(180deg, rgba(36, 23, 12, 0.02), rgba(36, 23, 12, 0.3)),
+    url("./assets/pawel.jpg") center 20% / auto 100% no-repeat,
+    radial-gradient(ellipse at 50% 80%, rgba(230, 173, 77, 0.2), transparent 55%),
     #3a2919;
+}
+
+.team-card-1 .member-photo::after {
+  background: linear-gradient(180deg, rgba(20, 15, 11, 0.02), rgba(20, 15, 11, 0.28));
+}
+
+.team-card-1 .member-initials,
+.team-card-1 .member-photo-note {
+  display: none;
 }
 
 .member-photo-note {
