@@ -1,7 +1,13 @@
 import axios from "axios";
 import { supabase } from "./auth/supabaseClient";
 
-const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000/api").replace(/\/+$/, "");
+const configuredApiUrl = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(
+  /\/+$/,
+  "",
+);
+const API_URL = /\/api$/i.test(configuredApiUrl)
+  ? configuredApiUrl
+  : `${configuredApiUrl}/api`;
 
 export async function apiRequest(path, { method = "GET", body, auth = true, responseType } = {}) {
   const headers = {};

@@ -1,22 +1,18 @@
 {
   "name": "wayup",
   "version": "1.0.0",
-  "description": "This app will solve the job destination problem",
-  "license": "ISC",
+  "private": true,
+  "description": "WayUp web app and API",
   "author": "Paweł Gilewicz",
   "type": "module",
-  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "setup": "npm install --prefix frontend && npm install --prefix backend/-way-up",
+    "dev": "concurrently -k -n API,WEB \"npm --prefix backend/-way-up run start:dev\" \"npm --prefix frontend run dev\"",
+    "lint": "npm --prefix frontend run lint",
+    "build": "npm --prefix frontend run build && npm --prefix backend/-way-up run build",
+    "test:backend": "npm --prefix backend/-way-up test"
   },
-  "dependencies": {
-    "@nestjs/config": "^4.0.0",
-    "@supabase/supabase-js": "^2.118.0",
-    "cors": "^2.8.6",
-    "dotenv": "^18.0.2",
-    "groq-sdk": "^1.6.0",
-    "pg": "^8.23.0",
-    "react-router-dom": "^7.18.4",
-    "uuid": "^14.0.2"
+  "devDependencies": {
+    "concurrently": "^9.2.1"
   }
 }

@@ -21,12 +21,10 @@
 }
 
 html {
-  min-width: 280px;
   scroll-behavior: smooth;
 }
 
 body {
-  min-width: 280px;
   min-height: 100vh;
   margin: 0;
   background: var(--ink);
@@ -3759,5 +3757,614 @@ html::-webkit-scrollbar-thumb {
   .step-image img,
   .discovery-link {
     transition-duration: 0.01ms;
+  }
+}
+
+@media (max-width: 1000px) {
+  .hero-section {
+    min-height: auto;
+    padding: 76px 6vw 104px;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    gap: 5vw;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(3rem, 6.8vw, 5rem);
+  }
+
+  .hero-visual {
+    height: clamp(370px, 48vw, 510px);
+  }
+
+  .discovery-section {
+    gap: 5vw;
+  }
+
+  .footer-main {
+    grid-template-columns: minmax(0, 1.2fr) repeat(2, minmax(0, 0.8fr));
+  }
+
+  .footer-note {
+    grid-column: 1 / -1;
+    max-width: none;
+  }
+}
+
+@media (max-width: 800px) {
+  .site-header {
+    position: sticky;
+  }
+
+  .mobile-menu-toggle {
+    display: grid;
+  }
+
+  .header-nav {
+    position: absolute;
+    top: calc(100% + 1px);
+    right: 0;
+    left: 0;
+    padding: 10px 24px 20px;
+    display: none;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 0;
+    border-bottom: 1px solid rgba(255, 220, 170, 0.16);
+    background: rgba(22, 15, 9, 0.98);
+    box-shadow: 0 22px 35px rgba(0, 0, 0, 0.32);
+  }
+
+  .header-nav.is-open {
+    display: flex;
+  }
+
+  .header-nav a:not(.header-account) {
+    display: block;
+    padding: 14px 3px;
+    border-bottom: 1px solid rgba(255, 220, 170, 0.1);
+  }
+
+  .header-nav .header-account {
+    align-self: flex-start;
+    margin-top: 14px;
+  }
+
+  .hero-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 34px;
+    padding: 66px 7vw 100px;
+  }
+
+  .hero-copy {
+    max-width: 700px;
+  }
+
+  .hero-copy h1 {
+    max-width: 760px;
+    font-size: clamp(3.2rem, 9vw, 5.8rem);
+  }
+
+  .hero-visual {
+    width: min(100%, 680px);
+    height: clamp(330px, 62vw, 510px);
+    justify-self: center;
+  }
+
+  .steps-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .step-card:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  .discovery-section {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .discovery-image,
+  .discovery-image img {
+    min-height: clamp(300px, 54vw, 430px);
+  }
+
+  .discovery-copy {
+    max-width: 680px;
+  }
+
+  .quiz-header {
+    gap: 12px;
+  }
+
+  .account-controls {
+    gap: 8px;
+  }
+
+  .radar-layout {
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+  }
+}
+
+@media (max-width: 560px) {
+  html {
+    scroll-padding-top: 76px;
+  }
+
+  .site-header,
+  .quiz-header {
+    height: 68px;
+    padding-inline: 16px;
+  }
+
+  .brand {
+    font-size: 1.55rem;
+  }
+
+  .hero-section {
+    padding: 48px 20px 82px;
+    gap: 27px;
+  }
+
+  .hero-copy h1 {
+    margin: 20px 0 16px;
+    font-size: clamp(2.25rem, 10.5vw, 3.65rem);
+    line-height: 1.03;
+    letter-spacing: -0.07em;
+  }
+
+  .hero-copy .eyebrow {
+    flex-wrap: wrap;
+    font-size: 0.64rem;
+    line-height: 1.55;
+  }
+
+  .hero-description {
+    font-size: 0.94rem;
+    line-height: 1.75;
+  }
+
+  .hero-actions,
+  .hero-actions .primary-link {
+    width: 100%;
+  }
+
+  .hero-actions .primary-link {
+    justify-content: center;
+    padding-inline: 14px;
+    font-size: 0.88rem;
+  }
+
+  .hero-note {
+    font-size: 0.72rem;
+  }
+
+  .hero-proof {
+    align-items: flex-start;
+    margin-top: 24px;
+    line-height: 1.55;
+  }
+
+  .hero-visual {
+    height: clamp(270px, 88vw, 390px);
+    border-radius: 40% 4px 4px 4px;
+  }
+
+  .visual-caption {
+    right: 16px;
+    bottom: 17px;
+    left: 16px;
+  }
+
+  .visual-caption strong {
+    font-size: 0.95rem;
+  }
+
+  .visual-caption div span {
+    font-size: 0.74rem;
+  }
+
+  .visual-index {
+    top: 12px;
+    right: 12px;
+    font-size: 0.56rem;
+  }
+
+  .visual-stamp {
+    left: -9px;
+    width: 78px;
+    height: 78px;
+  }
+
+  .visual-stamp strong {
+    font-size: 1.55rem;
+  }
+
+  .visual-stamp span {
+    font-size: 0.36rem;
+  }
+
+  .hero-scroll {
+    bottom: 24px;
+    left: 20px;
+    max-width: calc(100% - 40px);
+    font-size: 0.55rem;
+  }
+
+  .intro-section,
+  .steps-section,
+  .discovery-section,
+  .news-section,
+  .team-section {
+    padding-inline: 20px;
+  }
+
+  .intro-section {
+    padding-block: 70px;
+  }
+
+  .intro-section h2,
+  .steps-heading h2,
+  .news-heading h2,
+  .team-heading h2 {
+    font-size: clamp(1.9rem, 9vw, 2.7rem);
+    line-height: 1.08;
+  }
+
+  .intro-stats {
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+    row-gap: 22px;
+  }
+
+  .intro-stats div {
+    flex: 1 1 28%;
+    min-width: 82px;
+  }
+
+  .intro-stats span {
+    max-width: 130px;
+    line-height: 1.45;
+  }
+
+  .steps-section {
+    padding-block: 70px;
+  }
+
+  .steps-grid,
+  .news-grid,
+  .team-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .step-card:last-child:nth-child(odd),
+  .news-card:last-child:nth-child(odd) {
+    grid-column: auto;
+  }
+
+  .steps-heading {
+    align-items: flex-start;
+  }
+
+  .steps-heading .secondary-link {
+    align-self: flex-start;
+    line-height: 1.5;
+  }
+
+  .step-image {
+    height: clamp(160px, 55vw, 230px);
+  }
+
+  .discovery-section {
+    padding-block: 70px;
+    gap: 28px;
+  }
+
+  .discovery-image,
+  .discovery-image img {
+    min-height: clamp(250px, 78vw, 350px);
+  }
+
+  .discovery-image-note {
+    right: 16px;
+    bottom: 18px;
+    left: 16px;
+    font-size: 1.15rem;
+  }
+
+  .discovery-image-index {
+    top: 14px;
+    right: 14px;
+    font-size: 0.52rem;
+  }
+
+  .discovery-copy h2 {
+    font-size: clamp(2.25rem, 10.5vw, 3.4rem);
+  }
+
+  .discovery-coordinate {
+    margin-top: 32px;
+    font-size: 0.5rem;
+    letter-spacing: 0.1em;
+  }
+
+  .news-section,
+  .team-section {
+    padding-block: 70px;
+  }
+
+  .news-card {
+    min-height: 0;
+    padding: 20px;
+  }
+
+  .news-card h3 {
+    margin-top: 20px;
+    font-size: 1.35rem;
+  }
+
+  .news-card-top {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .news-card-bottom {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .news-card-bottom > span {
+    max-width: 100%;
+  }
+
+  .member-photo {
+    min-height: clamp(210px, 68vw, 290px);
+  }
+
+  .member-copy {
+    padding: 21px 20px 24px;
+  }
+
+  .member-copy h3 {
+    font-size: 1.45rem;
+  }
+
+  .closing-section {
+    align-items: flex-start;
+    flex-direction: column;
+    padding: 38px 20px;
+  }
+
+  .closing-section .primary-link {
+    justify-content: center;
+  }
+
+  .site-footer {
+    padding: 44px 20px 24px;
+  }
+
+  .footer-main {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px 16px;
+  }
+
+  .footer-brand-block,
+  .footer-note {
+    grid-column: 1 / -1;
+  }
+
+  .footer-note {
+    max-width: none;
+  }
+
+  .footer-bottom {
+    align-items: flex-start;
+    flex-direction: column;
+    overflow-wrap: anywhere;
+  }
+
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-card {
+    width: 100%;
+    padding: 26px 20px;
+  }
+
+  .quiz-layout {
+    gap: 16px;
+    padding: 22px 14px 72px;
+  }
+
+  .quiz-panel,
+  .saved-results {
+    min-width: 0;
+    padding: 20px 16px;
+  }
+
+  .account-controls {
+    margin-left: auto;
+  }
+
+  .quiz-header .sign-out-button {
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: 0.75rem;
+  }
+
+  .answer-options {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .answer-options .MuiFormControlLabel-root {
+    min-width: 0;
+    padding-inline: 7px;
+  }
+
+  .answer-options .MuiFormControlLabel-label {
+    overflow-wrap: anywhere;
+  }
+
+  .question-card {
+    min-height: 0;
+    padding-block: 16px 24px;
+  }
+
+  .quiz-controls {
+    align-items: stretch;
+  }
+
+  .quiz-controls .MuiButton-root {
+    min-width: 0;
+    flex: 1 1 0;
+    padding-inline: 8px;
+    font-size: 0.75rem;
+  }
+
+  .follow-up-panel,
+  .profile-panel,
+  .result-advice {
+    padding: 16px;
+  }
+
+  .radar-layout,
+  .skills-grid,
+  .roadmap-grid,
+  .learning-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .traits-radar {
+    width: min(100%, 210px);
+  }
+
+  .trait-row {
+    grid-template-columns: minmax(0, 1fr) minmax(50px, 1fr) 40px;
+    gap: 8px;
+    font-size: 0.72rem;
+  }
+
+  .path-tabs {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .path-tab {
+    padding-inline: 6px;
+    font-size: 0.72rem;
+    overflow-wrap: anywhere;
+  }
+
+  .path-facts div {
+    grid-template-columns: minmax(0, 1fr) minmax(0, auto);
+    gap: 6px;
+  }
+
+  .path-facts dd {
+    overflow-wrap: anywhere;
+  }
+
+  .share-page {
+    padding-inline: 14px;
+  }
+
+  .share-card {
+    padding: 20px 16px;
+  }
+
+  .share-card .trait-row {
+    grid-template-columns: minmax(0, 1fr) minmax(48px, 0.8fr) 38px;
+  }
+
+  .share-paths article {
+    padding: 16px;
+  }
+
+  .article-backdrop,
+  .privacy-backdrop {
+    padding: 10px;
+  }
+
+  .article-dialog,
+  .privacy-dialog {
+    width: 100%;
+    max-height: calc(100dvh - 20px);
+    padding: 22px 17px;
+    border-radius: 16px;
+  }
+
+  .article-dialog > h2 {
+    padding-right: 28px;
+    font-size: clamp(1.7rem, 8vw, 2.2rem);
+  }
+
+  .privacy-tabs {
+    overflow-x: auto;
+  }
+
+  .privacy-tabs button {
+    min-width: max-content;
+  }
+
+  .scroll-guide {
+    bottom: 10px;
+    max-width: calc(100vw - 76px);
+  }
+
+  .back-to-top {
+    right: 10px;
+    bottom: 68px;
+    width: 40px;
+    height: 44px;
+  }
+}
+
+@media (max-width: 360px) {
+  .site-header,
+  .quiz-header {
+    padding-inline: 12px;
+  }
+
+  .hero-section {
+    padding-inline: 16px;
+  }
+
+  .hero-copy h1 {
+    font-size: clamp(2.1rem, 10vw, 2.6rem);
+  }
+
+  .hero-proof {
+    font-size: 0.7rem;
+  }
+
+  .intro-section,
+  .steps-section,
+  .discovery-section,
+  .news-section,
+  .team-section {
+    padding-inline: 16px;
+  }
+
+  .quiz-header .brand {
+    font-size: 1.35rem;
+  }
+
+  .quiz-header .sign-out-button {
+    padding-inline: 4px;
+    font-size: 0.68rem;
+  }
+
+  .quiz-panel,
+  .saved-results {
+    padding-inline: 13px;
+  }
+
+  .quiz-controls .MuiButton-root {
+    font-size: 0.68rem;
+  }
+
+  .footer-main {
+    column-gap: 12px;
   }
 }
