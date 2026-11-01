@@ -3639,9 +3639,19 @@ html::-webkit-scrollbar-thumb {
 
 .team-card-2 .member-photo {
   background:
-    linear-gradient(180deg, rgba(36, 23, 12, 0.12), rgba(36, 23, 12, 0.58)),
-    url("./assets/bg_gold2.jpg") center / cover,
+    linear-gradient(180deg, rgba(36, 23, 12, 0.02), rgba(36, 23, 12, 0.3)),
+    url("./assets/jakub.jpg") center 20% / auto 100% no-repeat,
+    radial-gradient(ellipse at 50% 80%, rgba(230, 173, 77, 0.2), transparent 55%),
     #3a2919;
+}
+
+.team-card-2 .member-photo::after {
+  background: linear-gradient(180deg, rgba(20, 15, 11, 0.02), rgba(20, 15, 11, 0.28));
+}
+
+.team-card-2 .member-initials,
+.team-card-2 .member-photo-note {
+  display: none;
 }
 
 @media (max-width: 900px) {

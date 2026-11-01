@@ -62,7 +62,7 @@ const team = [
     role: "Backendowiec",
     description:
       "Dba o zaplecze, które łączy odpowiedzi, sztuczną inteligencję i rekomendacje w jeden spójny wynik.",
-    photoLabel: "Miejsce na zdjęcie Jakuba Zabłockiego",
+    photoLabel: "Portret Jakuba Zabłockiego",
   },
 ];
 
