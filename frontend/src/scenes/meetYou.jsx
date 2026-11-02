@@ -286,8 +286,11 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
       const link = document.createElement("a");
       link.href = url;
       link.download = `profil-wayup-${resultId}.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(url);
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       onError(getErrorMessage(error, "Nie udało się pobrać raportu PDF."));
     }

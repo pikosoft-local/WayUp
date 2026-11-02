@@ -1,7 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ResultsRepository } from './results.repository';
 import PDFDocument from 'pdfkit';
-import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
@@ -86,17 +85,10 @@ export class PdfService {
         'Roboto-Bold.ttf',
       );
 
-      try {
-        if (fs.existsSync(regularPath) && fs.existsSync(boldPath)) {
-          doc.registerFont('Report-Regular', regularPath);
-          doc.registerFont('Report-Bold', boldPath);
-          regular = 'Report-Regular';
-          bold = 'Report-Bold';
-        }
-      } catch {
-        regular = 'Helvetica';
-        bold = 'Helvetica-Bold';
-      }
+      doc.registerFont('Report-Regular', regularPath);
+      doc.registerFont('Report-Bold', boldPath);
+      regular = 'Report-Regular';
+      bold = 'Report-Bold';
 
       const setFont = (size: number, strong = false) => {
         doc.font(strong ? bold : regular).fontSize(size);
