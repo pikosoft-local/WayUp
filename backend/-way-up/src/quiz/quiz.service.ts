@@ -14,7 +14,7 @@ export class QuizService {
     const userPrompt =
       `Oto odpowiedzi użytkownika z quizu zawodowego:\n\n${formatSubmission(submission)}\n\n` +
       `Na tej podstawie napisz spersonalizowaną sugestię dalszej ścieżki zawodowej/edukacyjnej, ` +
-      `zgodnie z zasadami stylu z instrukcji systemowej.`;
+      `zgodnie z zasadami stylu z instrukcji systemowej. Odpowiedz wyłącznie po polsku.`;
 
     const ask = () =>
       this.groq.complete(

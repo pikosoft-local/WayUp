@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ChatMessage, GroqService } from '../ai/groq.service';
 import { badRequest, notFound, tooManyRequests } from '../common/errors';
 import { PathType } from '../profile/profile.schema';
-import { formatStoredAnswers } from './mentor.format';
+import { formatStoredAnswers, looksEnglish, stripMarkdown } from './mentor.format';
 import { mentorSystemPrompt } from './mentor.prompts';
 import { MentorRepository } from './mentor.repository';
 import { ResultsRepository } from '../results/results.repository';
@@ -55,7 +55,20 @@ export class MentorService {
       { role: 'user', content: message },
     ];
 
-    const reply = await this.groq.complete(conversation, { temperature: 0.8, maxTokens: 1500 });
+    const languageReminder: ChatMessage = {
+      role: 'system',
+      content:
+        'Odpowiedz teraz WYŁĄCZNIE po polsku, czystym tekstem, bez Markdown (bez gwiazdek, podkreśleń, backticków i #).',
+    };
+    const ask = () =>
+      this.groq.complete([...conversation, languageReminder], { temperature: 0.8, maxTokens: 1500 });
+
+    let rawReply = await ask();
+    for (let attempt = 1; attempt <= 2 && looksEnglish(rawReply); attempt++) {
+      this.logger.warn(`[${resultId}] Odpowiedź mentora po angielsku, ponawiam ${attempt}/2`);
+      rawReply = await ask();
+    }
+    const reply = stripMarkdown(rawReply);
 
     const saved = await this.messages.saveExchange({
       resultId,

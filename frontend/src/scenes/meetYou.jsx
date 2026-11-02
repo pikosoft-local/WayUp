@@ -24,6 +24,17 @@ function getErrorMessage(error, fallback) {
   return error instanceof Error ? error.message : fallback;
 }
 
+function cleanMentorText(text) {
+  return String(text ?? "")
+    .replace(/```[a-z]*\n?/gi, "")
+    .replace(/`([^`]*)`/g, "$1")
+    .replace(/^[ \t]{0,3}#{1,6}[ \t]*/gm, "")
+    .replace(/^[ \t]*[*•][ \t]+/gm, "- ")
+    .replace(/(\*\*|__)(.+?)\1/gs, "$2")
+    .replace(/\*+/g, "")
+    .trim();
+}
+
 function flattenQuestions(data) {
   if (!Array.isArray(data?.blocks)) {
     throw new Error("Serwer zwrócił nieprawidłowy format pytań.");
@@ -478,7 +489,7 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
             {chatMessages.map((message, index) => (
               <article className={`mentor-message ${message.role}`} key={`${message.createdAt}-${index}`}>
                 <strong>{message.role === "assistant" ? "Mentor AI" : "Ty"}</strong>
-                <p>{message.content}</p>
+                <p>{cleanMentorText(message.content)}</p>
               </article>
             ))}
             {chatMessages.length === 0 && <p>Zadaj pytanie o codzienną pracę, naukę albo pierwsze kroki.</p>}
