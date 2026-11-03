@@ -1110,6 +1110,35 @@ a {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
+  gap: 12px;
+}
+
+.profile-actions .MuiButton-root {
+  min-height: 46px;
+  padding: 0 20px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.profile-actions .MuiButton-contained {
+  color: #17140e;
+  border: 0;
+  background: var(--gold);
+}
+
+.profile-actions .MuiButton-contained:hover {
+  background: var(--gold-light);
+}
+
+.profile-actions .MuiButton-outlined {
+  color: var(--gold-light);
+  border-color: rgba(215, 173, 98, 0.55);
+}
+
+.profile-actions .MuiButton-outlined:hover {
+  border-color: var(--gold-light);
+  background: rgba(215, 173, 98, 0.08);
 }
 
 .profile-actions a,
@@ -1118,6 +1147,18 @@ a {
   overflow-wrap: anywhere;
   color: #c5c2b8;
   font-size: 0.78rem;
+}
+
+.restart-quiz-button {
+  margin-top: 24px;
+  color: var(--gold-light);
+  border-color: rgba(215, 173, 98, 0.55);
+  text-transform: none;
+}
+
+.restart-quiz-button:hover {
+  border-color: var(--gold-light);
+  background: rgba(215, 173, 98, 0.08);
 }
 
 .mentor-messages {
@@ -1165,6 +1206,35 @@ a {
 
 .mentor-form .MuiInputBase-root {
   color: #f7f5ef;
+}
+
+.mentor-form .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 255, 255, 0.22);
+}
+
+.mentor-form .MuiInputBase-input::placeholder {
+  color: #85847d;
+  opacity: 1;
+}
+
+.mentor-form .MuiButton-contained {
+  min-height: 40px;
+  padding: 0 18px;
+  color: #17140e;
+  border: 0;
+  border-radius: 6px;
+  background: var(--gold);
+  font-weight: 700;
+  text-transform: none;
+}
+
+.mentor-form .MuiButton-contained:hover {
+  background: var(--gold-light);
+}
+
+.mentor-form .MuiButton-contained:disabled {
+  color: #6b675e;
+  background: rgba(215, 173, 98, 0.25);
 }
 
 .history-button {
