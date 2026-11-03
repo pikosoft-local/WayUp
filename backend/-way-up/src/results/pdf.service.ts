@@ -46,7 +46,20 @@ export class PdfService {
     const BOTTOM = PAGE_HEIGHT - 55;
     const CONTENT_HEIGHT = BOTTOM - TOP;
 
+    const regularPath = path.join(
+      process.cwd(),
+      'fonts',
+      'Roboto-Regular.ttf',
+    );
+    const boldPath = path.join(
+      process.cwd(),
+      'fonts',
+      'Roboto-Bold.ttf',
+    );
+
     return new Promise<Buffer>((resolve, reject) => {
+      // font: regularPath zapobiega ładowaniu wbudowanej Helveticy,
+      // której pliki #standard-fonts nie są dostępne w funkcji Vercel.
       const doc = new PDFDocument({
         size: 'A4',
         margins: {
@@ -57,6 +70,7 @@ export class PdfService {
         },
         bufferPages: true,
         autoFirstPage: true,
+        font: regularPath,
         info: {
           Title: 'Twój Profil Przyszłości | WayUp AI',
           Author: 'WayUp AI',
@@ -71,24 +85,10 @@ export class PdfService {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', reject);
 
-      let regular = 'Helvetica';
-      let bold = 'Helvetica-Bold';
-
-      const regularPath = path.join(
-        process.cwd(),
-        'fonts',
-        'Roboto-Regular.ttf',
-      );
-      const boldPath = path.join(
-        process.cwd(),
-        'fonts',
-        'Roboto-Bold.ttf',
-      );
-
       doc.registerFont('Report-Regular', regularPath);
       doc.registerFont('Report-Bold', boldPath);
-      regular = 'Report-Regular';
-      bold = 'Report-Bold';
+      const regular = 'Report-Regular';
+      const bold = 'Report-Bold';
 
       const setFont = (size: number, strong = false) => {
         doc.font(strong ? bold : regular).fontSize(size);

@@ -64,6 +64,16 @@ test("PDF service generates a report using the bundled font files", async () => 
   assert.ok(pdfBuffer.length > 1000);
 });
 
+test("PDFDocument accepts a bundled font file instead of built-in Helvetica", () => {
+  const PDFDocument = require("pdfkit");
+  const path = require("node:path");
+  const fontPath = path.join(__dirname, "..", "fonts", "Roboto-Regular.ttf");
+  const doc = new PDFDocument({ autoFirstPage: false, font: fontPath });
+
+  assert.equal(doc._fontSource, fontPath);
+  assert.equal(doc._font.name, "Roboto-Regular");
+});
+
 test("public shared result uses the results service card", async () => {
   const card = { archetype: { name: "Twórca" }, paths: [] };
   const service = { publicCard: async (token) => (token === "share-token" ? card : null) };
