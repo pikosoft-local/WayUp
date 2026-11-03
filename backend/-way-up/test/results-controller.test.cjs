@@ -74,6 +74,22 @@ test("PDFDocument accepts a bundled font file instead of built-in Helvetica", ()
   assert.equal(doc._font.name, "Roboto-Regular");
 });
 
+test("font resolution finds bundled fonts relative to the compiled service", () => {
+  const fs = require("node:fs");
+  const path = require("node:path");
+  const serviceDir = path.dirname(require.resolve("../dist/results/pdf.service.js"));
+  const candidates = [
+    path.join(serviceDir, "..", "..", "fonts", "Roboto-Regular.ttf"),
+    path.join(serviceDir, "..", "..", "..", "fonts", "Roboto-Regular.ttf"),
+    path.join(process.cwd(), "fonts", "Roboto-Regular.ttf"),
+  ];
+
+  assert.ok(
+    candidates.some((candidate) => fs.existsSync(candidate)),
+    `Font not found in: ${candidates.join(", ")}`,
+  );
+});
+
 test("public shared result uses the results service card", async () => {
   const card = { archetype: { name: "Twórca" }, paths: [] };
   const service = { publicCard: async (token) => (token === "share-token" ? card : null) };

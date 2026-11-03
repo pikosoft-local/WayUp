@@ -1,7 +1,24 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ResultsRepository } from './results.repository';
 import PDFDocument from 'pdfkit';
+import * as fs from 'fs';
 import * as path from 'path';
+
+// W funkcji Vercel process.cwd() wskazuje na /var/task, a pliki z includeFiles
+// lądują obok kodu funkcji — dlatego szukamy fontów w kilku lokalizacjach.
+function resolveFontPath(fileName: string): string {
+  const candidates = [
+    path.join(__dirname, '..', '..', 'fonts', fileName),
+    path.join(__dirname, '..', '..', '..', 'fonts', fileName),
+    path.join(process.cwd(), 'fonts', fileName),
+  ];
+
+  const found = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!found) {
+    throw new Error(`Nie znaleziono pliku fontu ${fileName}.`);
+  }
+  return found;
+}
 
 @Injectable()
 export class PdfService {
@@ -46,16 +63,8 @@ export class PdfService {
     const BOTTOM = PAGE_HEIGHT - 55;
     const CONTENT_HEIGHT = BOTTOM - TOP;
 
-    const regularPath = path.join(
-      process.cwd(),
-      'fonts',
-      'Roboto-Regular.ttf',
-    );
-    const boldPath = path.join(
-      process.cwd(),
-      'fonts',
-      'Roboto-Bold.ttf',
-    );
+    const regularPath = resolveFontPath('Roboto-Regular.ttf');
+    const boldPath = resolveFontPath('Roboto-Bold.ttf');
 
     return new Promise<Buffer>((resolve, reject) => {
       // font: regularPath zapobiega ładowaniu wbudowanej Helveticy,
