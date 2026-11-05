@@ -4,6 +4,22 @@ import PDFDocument from 'pdfkit';
 import * as fs from 'fs';
 import * as path from 'path';
 
+// W funkcji Vercel process.cwd() wskazuje na /var/task, a pliki z includeFiles
+// lądują obok kodu funkcji — dlatego szukamy fontów w kilku lokalizacjach.
+function resolveFontPath(fileName: string): string {
+  const candidates = [
+    path.join(__dirname, '..', '..', 'fonts', fileName),
+    path.join(__dirname, '..', '..', '..', 'fonts', fileName),
+    path.join(process.cwd(), 'fonts', fileName),
+  ];
+
+  const found = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!found) {
+    throw new Error(`Nie znaleziono pliku fontu ${fileName}.`);
+  }
+  return found;
+}
+
 @Injectable()
 export class PdfService {
   constructor(private readonly resultsRepo: ResultsRepository) {}
@@ -47,7 +63,12 @@ export class PdfService {
     const BOTTOM = PAGE_HEIGHT - 55;
     const CONTENT_HEIGHT = BOTTOM - TOP;
 
+    const regularPath = resolveFontPath('Roboto-Regular.ttf');
+    const boldPath = resolveFontPath('Roboto-Bold.ttf');
+
     return new Promise<Buffer>((resolve, reject) => {
+      // font: regularPath zapobiega ładowaniu wbudowanej Helveticy,
+      // której pliki #standard-fonts nie są dostępne w funkcji Vercel.
       const doc = new PDFDocument({
         size: 'A4',
         margins: {
@@ -58,6 +79,7 @@ export class PdfService {
         },
         bufferPages: true,
         autoFirstPage: true,
+        font: regularPath,
         info: {
           Title: 'Twój Profil Przyszłości | WayUp AI',
           Author: 'WayUp AI',
@@ -72,31 +94,10 @@ export class PdfService {
       doc.on('end', () => resolve(Buffer.concat(buffers)));
       doc.on('error', reject);
 
-      let regular = 'Helvetica';
-      let bold = 'Helvetica-Bold';
-
-      const regularPath = path.join(
-        process.cwd(),
-        'fonts',
-        'Roboto-Regular.ttf',
-      );
-      const boldPath = path.join(
-        process.cwd(),
-        'fonts',
-        'Roboto-Bold.ttf',
-      );
-
-      try {
-        if (fs.existsSync(regularPath) && fs.existsSync(boldPath)) {
-          doc.registerFont('Report-Regular', regularPath);
-          doc.registerFont('Report-Bold', boldPath);
-          regular = 'Report-Regular';
-          bold = 'Report-Bold';
-        }
-      } catch {
-        regular = 'Helvetica';
-        bold = 'Helvetica-Bold';
-      }
+      doc.registerFont('Report-Regular', regularPath);
+      doc.registerFont('Report-Bold', boldPath);
+      const regular = 'Report-Regular';
+      const bold = 'Report-Bold';
 
       const setFont = (size: number, strong = false) => {
         doc.font(strong ? bold : regular).fontSize(size);

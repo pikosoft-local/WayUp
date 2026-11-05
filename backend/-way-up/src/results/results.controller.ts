@@ -17,29 +17,27 @@ export class ResultsController {
   @UseGuards(AuthGuard)
   @Get()
   async getResults(@CurrentUser() user: any) {
-    const s = this.resultsService as any;
-    return (s.findAllForUser || s.getUserResults || s.getResults || s.findAll)?.call(s, user.id);
+    return { items: await this.resultsService.list(user.id) };
   }
 
   @UseGuards(AuthGuard)
   @Get(':id')
   async getResultById(@CurrentUser() user: any, @Param('id') id: string) {
-    const s = this.resultsService as any;
-    return (s.findByIdForUser || s.getUserResult || s.getResult || s.findOne)?.call(s, user.id, id);
+    return this.resultsService.get(user.id, id);
   }
 
   @UseGuards(AuthGuard)
   @Post(':id/share')
   async shareResult(@CurrentUser() user: any, @Param('id') id: string) {
-    const s = this.resultsService as any;
-    return (s.createShareToken || s.share || s.shareResult)?.call(s, user.id, id);
+    const shareToken = await this.resultsService.share(user.id, id);
+    return { shareToken };
   }
 
   @UseGuards(AuthGuard)
   @Delete(':id/share')
   async unshareResult(@CurrentUser() user: any, @Param('id') id: string) {
-    const s = this.resultsService as any;
-    return (s.revokeShareToken || s.unshare || s.unshareResult)?.call(s, user.id, id);
+    await this.resultsService.unshare(user.id, id);
+    return { ok: true };
   }
 
   @UseGuards(AuthGuard)
@@ -65,6 +63,7 @@ export class ResultsController {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename=profil-kariery-${id}.pdf`,
       'Content-Length': pdfBuffer.length,
+      'Cache-Control': 'private, no-store',
     });
 
     res.end(pdfBuffer);
@@ -77,8 +76,7 @@ export class ShareController {
 
   @Get(':token')
   async getSharedResult(@Param('token') token: string) {
-    const s = this.resultsService as any;
-    return (s.findByShareToken || s.getSharedResult || s.getShare)?.call(s, token);
+    return this.resultsService.publicCard(token);
   }
 }
 
@@ -93,7 +91,6 @@ export class CompareController {
     @Param('token') token: string,
     @Query('resultId') resultId?: string,
   ) {
-    const s = this.resultsService as any;
-    return (s.compareWithShared || s.compare || s.compareResults)?.call(s, user.id, token, resultId);
+    return this.resultsService.compare(user.id, token, resultId);
   }
 }

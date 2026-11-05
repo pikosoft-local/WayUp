@@ -233,6 +233,7 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
   const [shareMessage, setShareMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatText, setChatText] = useState("");
+  const [downloadingPdf, setDownloadingPdf] = useState(false);
   const [sendingChat, setSendingChat] = useState(false);
   const paths = profile?.paths ?? [];
   const path = paths.find((item) => item.type === selectedPath) ?? paths[0];
@@ -289,18 +290,28 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
   }
 
   async function handlePdfDownload() {
+    if (downloadingPdf) return;
+    setDownloadingPdf(true);
     try {
       const blob = await apiRequest(`/results/${encodeURIComponent(resultId)}/pdf`, {
         responseType: "blob",
       });
+      if (!(blob instanceof Blob) || blob.size === 0) {
+        throw new Error("Serwer zwrócił pusty plik PDF.");
+      }
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
       link.download = `profil-wayup-${resultId}.pdf`;
+      link.style.display = "none";
+      document.body.appendChild(link);
       link.click();
-      URL.revokeObjectURL(url);
+      link.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     } catch (error) {
       onError(getErrorMessage(error, "Nie udało się pobrać raportu PDF."));
+    } finally {
+      setDownloadingPdf(false);
     }
   }
 
@@ -472,8 +483,15 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
 
       {canLoadDetails && (
         <section className="profile-section profile-actions">
-          <Button startIcon={<DownloadRoundedIcon />} onClick={handlePdfDownload}>Pobierz PDF</Button>
-          <Button startIcon={<ShareRoundedIcon />} onClick={handleShare}>Udostępnij wynik</Button>
+          <Button
+            variant="contained"
+            startIcon={downloadingPdf ? <CircularProgress size={16} color="inherit" /> : <DownloadRoundedIcon />}
+            onClick={handlePdfDownload}
+            disabled={downloadingPdf}
+          >
+            {downloadingPdf ? "Przygotowuję PDF…" : "Pobierz PDF"}
+          </Button>
+          <Button variant="outlined" startIcon={<ShareRoundedIcon />} onClick={handleShare}>Udostępnij wynik</Button>
           {shareLink && <a href={shareLink}>{shareLink}</a>}
           {shareMessage && <span>{shareMessage}</span>}
         </section>
@@ -753,7 +771,7 @@ function MeetYou() {
                 canLoadDetails={result.saved !== false}
                 onError={setError}
               />
-              <Button variant="outlined" onClick={() => {
+              <Button variant="outlined" className="restart-quiz-button" onClick={() => {
                 setResult(null);
                 setNotice("");
                 setError("");
