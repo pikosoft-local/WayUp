@@ -1,34 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ResultsRepository } from './results.repository';
 import PDFDocument from 'pdfkit';
 import * as fs from 'fs';
 import * as path from 'path';
 
-// W funkcji Vercel process.cwd() wskazuje na /var/task, a pliki z includeFiles
-// lądują obok kodu funkcji — dlatego szukamy fontów w kilku lokalizacjach.
-function resolveFontPath(fileName: string): string {
-  const candidates = [
-    path.join(__dirname, '..', '..', 'fonts', fileName),
-    path.join(__dirname, '..', '..', '..', 'fonts', fileName),
-    path.join(process.cwd(), 'fonts', fileName),
-  ];
-
-  const found = candidates.find((candidate) => fs.existsSync(candidate));
-  if (!found) {
-    throw new Error(`Nie znaleziono pliku fontu ${fileName}.`);
-  }
-  return found;
-}
-
 @Injectable()
 export class PdfService {
+  private readonly logger = new Logger(PdfService.name);
+
   constructor(private readonly resultsRepo: ResultsRepository) {}
 
   async generateProfilePdf(
     userId: string,
     resultId: string,
   ): Promise<Buffer> {
+    const t0 = performance.now();
     const result = await this.resultsRepo.findOwned(resultId, userId);
+    const tData = performance.now();
 
     if (!result?.profile) {
       throw new NotFoundException(
@@ -63,12 +51,7 @@ export class PdfService {
     const BOTTOM = PAGE_HEIGHT - 55;
     const CONTENT_HEIGHT = BOTTOM - TOP;
 
-    const regularPath = resolveFontPath('Roboto-Regular.ttf');
-    const boldPath = resolveFontPath('Roboto-Bold.ttf');
-
     return new Promise<Buffer>((resolve, reject) => {
-      // font: regularPath zapobiega ładowaniu wbudowanej Helveticy,
-      // której pliki #standard-fonts nie są dostępne w funkcji Vercel.
       const doc = new PDFDocument({
         size: 'A4',
         margins: {
@@ -79,7 +62,6 @@ export class PdfService {
         },
         bufferPages: true,
         autoFirstPage: true,
-        font: regularPath,
         info: {
           Title: 'Twój Profil Przyszłości | WayUp AI',
           Author: 'WayUp AI',
@@ -91,20 +73,46 @@ export class PdfService {
       const buffers: Buffer[] = [];
 
       doc.on('data', (chunk: Buffer) => buffers.push(chunk));
-      doc.on('end', () => resolve(Buffer.concat(buffers)));
+      doc.on('end', () => {
+        const tEnd = performance.now();
+        this.logger.log(
+          `PDF: dane ${(tData - t0).toFixed(0)} ms, render ${(tEnd - tData).toFixed(0)} ms, ` +
+            `razem ${(tEnd - t0).toFixed(0)} ms`,
+        );
+        resolve(Buffer.concat(buffers));
+      });
       doc.on('error', reject);
 
-      doc.registerFont('Report-Regular', regularPath);
-      doc.registerFont('Report-Bold', boldPath);
-      const regular = 'Report-Regular';
-      const bold = 'Report-Bold';
+      let regular = 'Helvetica';
+      let bold = 'Helvetica-Bold';
+
+      const regularPath = path.join(
+        process.cwd(),
+        'fonts',
+        'Roboto-Regular.ttf',
+      );
+      const boldPath = path.join(
+        process.cwd(),
+        'fonts',
+        'Roboto-Bold.ttf',
+      );
+
+      try {
+        if (fs.existsSync(regularPath) && fs.existsSync(boldPath)) {
+          doc.registerFont('Report-Regular', regularPath);
+          doc.registerFont('Report-Bold', boldPath);
+          regular = 'Report-Regular';
+          bold = 'Report-Bold';
+        }
+      } catch {
+        regular = 'Helvetica';
+        bold = 'Helvetica-Bold';
+      }
 
       const setFont = (size: number, strong = false) => {
         doc.font(strong ? bold : regular).fontSize(size);
       };
 
-      // Rysowanie w strefie dolnego marginesu (stopki) bez wyzwalania
-      // automatycznego dodawania nowej strony przez PDFKit.
       const withoutBottomMargin = (fn: () => void) => {
         const prev = doc.page.margins.bottom;
         doc.page.margins.bottom = 0;
@@ -571,7 +579,6 @@ export class PdfService {
         .strokeColor('#41495A')
         .stroke();
 
-      // Stopka okładki: w strefie dolnego marginesu, więc bez auto-page-break.
       withoutBottomMargin(() => {
         setFont(8);
         doc.fillColor('#C0C5CF').text(
