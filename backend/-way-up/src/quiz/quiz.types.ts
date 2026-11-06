@@ -1,4 +1,5 @@
 import type { Profile } from '../profile/profile.schema';
+import type { Question } from '../questions/questions.types';
 
 export type AnswerValue = string | string[];
 
@@ -12,6 +13,7 @@ export interface FollowUpAnswer {
 export interface QuizSubmission {
   answers: QuizAnswers;
   followUps: FollowUpAnswer[];
+  questions?: ReadonlyMap<string, Question>;
 }
 
 export interface StoredAnswer {

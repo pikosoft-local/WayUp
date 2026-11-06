@@ -71,3 +71,10 @@ export const QUESTION_BANK: Question[] = [
 export const QUESTIONS_BY_ID: Map<string, Question> = new Map(
   QUESTION_BANK.map((question) => [question.id, question]),
 );
+
+export function buildQuestionLookup(dynamic: Question[]): Map<string, Question> {
+  const lookup = new Map<string, Question>();
+  for (const question of QUESTION_BANK) if (question.block === 1) lookup.set(question.id, question);
+  for (const question of dynamic) lookup.set(question.id, question);
+  return lookup;
+}
