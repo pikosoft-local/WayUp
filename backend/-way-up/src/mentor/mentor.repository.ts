@@ -74,4 +74,19 @@ export class MentorRepository {
     }
     return true;
   }
+
+  async deleteByResult(resultId: string, userId: string): Promise<void> {
+    const { error } = await this.table.delete().eq('result_id', resultId).eq('user_id', userId);
+    if (error) this.databaseError('deleteByResult', error.message);
+  }
+
+  async deleteAllByUser(userId: string): Promise<void> {
+    const { error } = await this.table.delete().eq('user_id', userId);
+    if (error) this.databaseError('deleteAllByUser', error.message);
+  }
+
+  private databaseError(operation: string, message: string): never {
+    this.logger.error(`${operation}: ${message}`);
+    throw new InternalServerErrorException({ ok: false, error: 'Błąd bazy danych.' });
+  }
 }

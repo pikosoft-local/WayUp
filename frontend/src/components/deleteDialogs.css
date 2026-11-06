@@ -1,0 +1,134 @@
+:root {
+  --danger: #e2806b;
+}
+
+.delete-dialog.MuiPaper-root {
+  width: min(480px, calc(100vw - 32px));
+  color: #f7f5ef;
+  border: 1px solid var(--line);
+  border-radius: 0;
+  background: #191a17;
+  background-image: none;
+}
+
+.delete-dialog .MuiDialogTitle-root {
+  padding: 26px 26px 8px;
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  font-weight: 550;
+  letter-spacing: -0.03em;
+}
+
+.delete-dialog .MuiDialogContent-root {
+  padding: 8px 26px 6px;
+}
+
+.delete-dialog .MuiDialogContent-root p {
+  margin: 0 0 12px;
+  color: #c5c2b8;
+  font-size: 0.9rem;
+  line-height: 1.65;
+}
+
+.delete-dialog-list {
+  margin: 0 0 14px;
+  padding-left: 20px;
+  color: #d1cec4;
+  font-size: 0.86rem;
+  line-height: 1.75;
+}
+
+.delete-dialog .MuiAlert-root {
+  margin-top: 14px;
+}
+
+.delete-dialog .MuiInputLabel-root {
+  color: var(--muted);
+}
+
+.delete-dialog .MuiInputLabel-root.Mui-focused {
+  color: var(--danger);
+}
+
+.delete-dialog .MuiOutlinedInput-root {
+  color: #f7f5ef;
+}
+
+.delete-dialog .MuiOutlinedInput-notchedOutline {
+  border-color: rgba(255, 226, 179, 0.28);
+}
+
+.delete-dialog .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline {
+  border-color: var(--danger);
+}
+
+.delete-dialog .MuiDialogActions-root {
+  gap: 8px;
+  padding: 18px 26px 24px;
+}
+
+.delete-dialog .MuiButton-root {
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 6px;
+  font-weight: 700;
+  text-transform: none;
+}
+
+.delete-dialog .delete-cancel {
+  color: var(--gold-light);
+}
+
+.delete-dialog .delete-cancel:hover {
+  background: rgba(215, 173, 98, 0.08);
+}
+
+.delete-dialog .delete-confirm.MuiButton-contained {
+  color: #1d0f0b;
+  background: var(--danger);
+  box-shadow: none;
+}
+
+.delete-dialog .delete-confirm.MuiButton-contained:hover {
+  background: #eb9886;
+}
+
+.delete-dialog .delete-confirm.Mui-disabled {
+  color: rgba(247, 245, 239, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.MuiButton-root.danger-button {
+  color: var(--danger);
+  border-color: rgba(226, 128, 107, 0.45);
+  text-transform: none;
+}
+
+.MuiButton-root.danger-button:hover {
+  border-color: var(--danger);
+  background: rgba(226, 128, 107, 0.08);
+}
+
+.result-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.result-footer .restart-quiz-button {
+  margin-top: 0;
+}
+
+.account-danger-zone {
+  margin-top: 26px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+}
+
+.account-danger-zone p {
+  margin: 0 0 12px;
+  color: #aaa99f;
+  font-size: 0.78rem;
+  line-height: 1.6;
+}

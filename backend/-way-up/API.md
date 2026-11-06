@@ -268,6 +268,15 @@ Karta nie zawiera odpowiedzi z quizu ani danych konta – tylko to, co widać po
 
 `score` 0–100 (100 = identyczne cechy), `level`: `high` (≥80), `medium` (60–79), `low`. Gdy użytkownik nie ma jeszcze wyniku → 404 z komunikatem "Najpierw wypełnij quiz…" (przekieruj do quizu).
 
+## Usuwanie danych (RODO)
+
+- 🔒 `DELETE /results/:id` → `{ "ok": true }`. Usuwa wynik razem z odpowiedziami, profilem i rozmową z mentorem. Publiczny link do tego wyniku przestaje działać (404). Cudzy lub nieistniejący wynik → 404. Limit: 20 na minutę.
+- 🔒 `DELETE /results/:id/share` → `{ "ok": true }`. Unieważnia tylko link do udostępniania (wynik zostaje). Ponowne `POST /results/:id/share` tworzy **nowy** token.
+- 🔒 `DELETE /account` z body `{ "confirm": "USUŃ" }` → `{ "ok": true }`. Usuwa **wszystkie** wyniki, rozmowy z mentorem i samo konto logowania. Operacji nie da się cofnąć. Bez poprawnego `confirm` → 400. Limit: 3 na 10 minut.
+  - Gdy dane zostały usunięte, ale konta nie udało się usunąć, serwer zwraca 500 z komunikatem – można bezpiecznie ponowić (operacja jest idempotentna).
+  - Po sukcesie front czyści lokalny szkic quizu i wylogowuje **lokalnie**: `supabase.auth.signOut({ scope: 'local' })`. Zwykłe `signOut()` próbowałoby unieważnić sesję na serwerze dla użytkownika, który już nie istnieje.
+  - Poza zasięgiem tego endpointu: kopie zapasowe bazy po stronie Supabase oraz dane, które zostały wcześniej przetworzone przez dostawcę AI (Groq). Warto to wpisać w politykę prywatności.
+
 ## Mentor AI
 
 Rozmowa z AI wcielającym się w mentora wybranej ścieżki. Każda para (wynik, `pathType`) ma osobny wątek z historią.
@@ -342,6 +351,7 @@ for (;;) {
 - [ ] Pobieranie PDF przez `fetch` z tokenem (blob), nie zwykłym linkiem
 - [ ] Udostępnianie: token → link, publiczna strona `/share/:token`, porównanie
 - [ ] Czat z mentorem per ścieżka
+- [ ] Usuwanie wyniku, unieważnianie linku i usuwanie konta (z potwierdzeniem wpisaniem „USUŃ”)
 - [ ] Obsługa kodów 400 / 401 / 404 / 429 / 500 / 503, loader przy `SendHandler` i czacie
 - [ ] Zapisanie `questionsToken` z `GET /questions` i odsyłanie go w `SendHandler` oraz `follow-up`
 - [ ] Czat mentora przez `POST /results/:id/chat/stream` (fallback: zwykły `POST /results/:id/chat`)

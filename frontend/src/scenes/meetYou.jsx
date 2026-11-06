@@ -14,9 +14,12 @@ import { Link, Navigate } from "react-router-dom";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import LinkOffRoundedIcon from "@mui/icons-material/LinkOffRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import ShareRoundedIcon from "@mui/icons-material/ShareRounded";
 import { apiRequest } from "../api";
+import { ConfirmDeleteResultDialog, DeleteAccountDialog } from "../components/deleteDialogs";
 import { supabase } from "../auth/supabaseClient";
 import { useAuth } from "../auth/useAuth";
 
@@ -225,11 +228,13 @@ function TraitsRadar({ traits }) {
   );
 }
 
-function ProfileView({ profile, resultId, canLoadDetails, onError }) {
+function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onShareChange, onError }) {
   const [selectedPath, setSelectedPath] = useState("safe");
   const [gapAnalysis, setGapAnalysis] = useState(null);
   const [loadingGap, setLoadingGap] = useState(false);
-  const [shareLink, setShareLink] = useState("");
+  const [shareLink, setShareLink] = useState(() =>
+    initialShareToken ? `${window.location.origin}/share/${initialShareToken}` : "",
+  );
   const [shareMessage, setShareMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatText, setChatText] = useState("");
@@ -282,10 +287,23 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
       if (!data.shareToken) throw new Error("Serwer nie zwrócił linku do udostępnienia.");
       const link = `${window.location.origin}/share/${data.shareToken}`;
       setShareLink(link);
+      onShareChange?.(resultId, true);
       await navigator.clipboard.writeText(link);
       setShareMessage("Link skopiowany do schowka.");
     } catch (error) {
       setShareMessage(getErrorMessage(error, "Nie udało się utworzyć linku."));
+    }
+  }
+
+  async function handleUnshare() {
+    setShareMessage("");
+    try {
+      await apiRequest(`/results/${encodeURIComponent(resultId)}/share`, { method: "DELETE" });
+      setShareLink("");
+      setShareMessage("Link przestał działać. Każdy, kto go ma, zobaczy teraz błąd.");
+      onShareChange?.(resultId, false);
+    } catch (error) {
+      setShareMessage(getErrorMessage(error, "Nie udało się unieważnić linku."));
     }
   }
 
@@ -492,6 +510,11 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
             {downloadingPdf ? "Przygotowuję PDF…" : "Pobierz PDF"}
           </Button>
           <Button variant="outlined" startIcon={<ShareRoundedIcon />} onClick={handleShare}>Udostępnij wynik</Button>
+          {shareLink && (
+            <Button variant="outlined" startIcon={<LinkOffRoundedIcon />} onClick={handleUnshare}>
+              Przestań udostępniać
+            </Button>
+          )}
           {shareLink && <a href={shareLink}>{shareLink}</a>}
           {shareMessage && <span>{shareMessage}</span>}
         </section>
@@ -543,6 +566,11 @@ function MeetYou() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [questionsToken, setQuestionsToken] = useState(null);
+  const [resultToDelete, setResultToDelete] = useState(null);
+  const [deletingResult, setDeletingResult] = useState(false);
+  const [deleteResultError, setDeleteResultError] = useState("");
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const currentDraft =
     draftUserId === session?.user?.id ? draftState : readDraft(session?.user?.id);
   const { answers, page, followUps } = currentDraft;
@@ -552,7 +580,11 @@ function MeetYou() {
     apiRequest("/questions", { auth: false })
       .then((data) => {
         const questionsFromApi = flattenQuestions(data);
-        if (active) setQuestions(questionsFromApi);
+        if (active) {
+          setQuestions(questionsFromApi);
+          // Token potwierdza, na jaki zestaw pytań odpowiadamy – odsyłamy go razem z odpowiedziami.
+          setQuestionsToken(typeof data.questionsToken === "string" ? data.questionsToken : null);
+        }
       })
       .catch((requestError) => {
         if (active) setError(getErrorMessage(requestError, "Nie udało się pobrać pytań."));
@@ -638,7 +670,7 @@ function MeetYou() {
     try {
       const data = await apiRequest("/questions/follow-up", {
         method: "POST",
-        body: { answers, followUps },
+        body: { answers, followUps, ...(questionsToken && { questionsToken }) },
       });
       if (!data.question?.id || !data.question?.text) {
         throw new Error("Serwer zwrócił nieprawidłowe pytanie dodatkowe.");
@@ -677,7 +709,7 @@ function MeetYou() {
     try {
       const data = await apiRequest("/SendHandler", {
         method: "POST",
-        body: { answers, followUps },
+        body: { answers, followUps, ...(questionsToken && { questionsToken }) },
       });
       if (!data.ok || typeof data.result !== "string" || !data.requestId) {
         throw new Error("Serwer zwrócił nieprawidłowy wynik quizu.");
@@ -716,6 +748,31 @@ function MeetYou() {
       setError(getErrorMessage(requestError, "Nie udało się wysłać quizu. Spróbuj ponownie."));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function handleShareChange(resultId, shared) {
+    setHistory((previous) =>
+      previous.map((item) => (item.id === resultId ? { ...item, shared } : item)),
+    );
+  }
+
+  async function confirmDeleteResult() {
+    if (!resultToDelete || deletingResult) return;
+    setDeletingResult(true);
+    setDeleteResultError("");
+    try {
+      await apiRequest(`/results/${encodeURIComponent(resultToDelete)}`, { method: "DELETE" });
+      setHistory((previous) => previous.filter((item) => item.id !== resultToDelete));
+      setResult(null);
+      setResultToDelete(null);
+      setError("");
+      setNotice("Wynik został usunięty razem z rozmową z mentorem.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (requestError) {
+      setDeleteResultError(getErrorMessage(requestError, "Nie udało się usunąć wyniku."));
+    } finally {
+      setDeletingResult(false);
     }
   }
 
@@ -769,16 +826,33 @@ function MeetYou() {
                 profile={result.profile}
                 resultId={result.id}
                 canLoadDetails={result.saved !== false}
+                initialShareToken={result.shareToken}
+                onShareChange={handleShareChange}
                 onError={setError}
               />
-              <Button variant="outlined" className="restart-quiz-button" onClick={() => {
-                setResult(null);
-                setNotice("");
-                setError("");
-                updateDraft({ answers: {}, followUps: [], page: 0 });
-              }}>
-                Wypełnij quiz ponownie
-              </Button>
+              <div className="result-footer">
+                <Button variant="outlined" className="restart-quiz-button" onClick={() => {
+                  setResult(null);
+                  setNotice("");
+                  setError("");
+                  updateDraft({ answers: {}, followUps: [], page: 0 });
+                }}>
+                  Wypełnij quiz ponownie
+                </Button>
+                {result.saved !== false && (
+                  <Button
+                    variant="outlined"
+                    className="danger-button"
+                    startIcon={<DeleteOutlineRoundedIcon />}
+                    onClick={() => {
+                      setDeleteResultError("");
+                      setResultToDelete(result.id);
+                    }}
+                  >
+                    Usuń ten wynik
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
             <>
@@ -896,8 +970,28 @@ function MeetYou() {
               ))}
             </div>
           )}
+          <div className="account-danger-zone">
+            <p>Możesz w każdej chwili usunąć konto razem ze wszystkimi wynikami i rozmowami z mentorem.</p>
+            <Button
+              variant="outlined"
+              size="small"
+              className="danger-button"
+              onClick={() => setAccountDialogOpen(true)}
+            >
+              Usuń konto i dane
+            </Button>
+          </div>
         </aside>
       </div>
+
+      <ConfirmDeleteResultDialog
+        open={Boolean(resultToDelete)}
+        busy={deletingResult}
+        error={deleteResultError}
+        onCancel={() => setResultToDelete(null)}
+        onConfirm={confirmDeleteResult}
+      />
+      {accountDialogOpen && <DeleteAccountDialog onClose={() => setAccountDialogOpen(false)} />}
     </main>
   );
 }

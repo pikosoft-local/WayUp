@@ -93,4 +93,16 @@ export class ResultsRepository {
     if (error) this.fail('setShareToken', error);
     return (data?.length ?? 0) > 0;
   }
+
+  async deleteOwned(id: string, userId: string): Promise<boolean> {
+    const { data, error } = await this.table.delete().eq('id', id).eq('user_id', userId).select('id');
+    if (error) this.fail('deleteOwned', error);
+    return (data?.length ?? 0) > 0;
+  }
+
+  async deleteAllByUser(userId: string): Promise<number> {
+    const { data, error } = await this.table.delete().eq('user_id', userId).select('id');
+    if (error) this.fail('deleteAllByUser', error);
+    return data?.length ?? 0;
+  }
 }
