@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { extractJson } from '../ai/extract-json';
-import { GroqService } from '../ai/groq.service';
+import { AiOverloadedException, GroqService } from '../ai/groq.service';
 import { QuizSubmission } from '../quiz/quiz.types';
 import { formatSubmission } from '../quiz/quiz.utils';
 import { PROFILE_SYSTEM_PROMPT, profileUserPrompt } from './profile.prompts';
@@ -39,6 +39,10 @@ export class ProfileService {
           .join(' | ');
         this.logger.warn(`[${requestId}] Profil niezgodny ze schematem (próba ${attempt}): ${problems}`);
       } catch (err) {
+        if (err instanceof AiOverloadedException) {
+          this.logger.warn(`[${requestId}] Groq przeciążony – profil pominięty`);
+          break;
+        }
         this.logger.warn(
           `[${requestId}] Błąd generowania profilu (próba ${attempt}): ${err instanceof Error ? err.message : err}`,
         );
