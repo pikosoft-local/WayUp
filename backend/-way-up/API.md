@@ -76,7 +76,7 @@ Odpowiedź:
 ```json
 {
   "ok": true,
-  "version": 1,
+  "version": 2,
   "slider": { "min": 0, "max": 100 },
   "maxFollowUps": 3,
   "questionsToken": "<podpisany token>",

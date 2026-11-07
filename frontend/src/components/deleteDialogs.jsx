@@ -12,10 +12,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../api";
 import { supabase } from "../auth/supabaseClient";
+import { DRAFT_KEY_PREFIX } from "../quizDraft";
 import "./deleteDialogs.css";
 
 const CONFIRMATION_WORD = "USUŃ";
-const DRAFT_KEY_PREFIX = "wayup.quizDraft.";
 
 const dialogSlotProps = { paper: { className: "delete-dialog" } };
 

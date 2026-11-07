@@ -43,7 +43,7 @@ export class QuizController {
   ): Promise<QuizSuccessResponse> {
     const requestId = randomUUID();
     this.logger.log(
-      `[${requestId}] user=${user.id} ${JSON.stringify({ answers: submission.answers, followUps: submission.followUps })}`,
+      `[${requestId}] user=${user.id} odpowiedzi=${Object.keys(submission.answers).length} pytania_dodatkowe=${submission.followUps.length}`,
     );
 
     let result: string;

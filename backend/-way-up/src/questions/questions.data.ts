@@ -1,6 +1,6 @@
 import { Question, QuestionBlock } from './questions.types';
 
-export const QUESTIONS_VERSION = 1;
+export const QUESTIONS_VERSION = 2;
 export const MAX_FOLLOW_UPS = 3;
 export const SLIDER_MIN = 0;
 export const SLIDER_MAX = 100;
@@ -61,9 +61,9 @@ export const QUESTION_BANK: Question[] = [
     block: 1,
     type: 'slider',
     label: 'Miasto czy natura',
-    text: 'Miasto czy natura?',
-    minLabel: 'Miasto',
-    maxLabel: 'Natura',
+    text: 'Gdzie wolisz spędzać czas?',
+    minLabel: 'W mieście',
+    maxLabel: 'Wśród natury',
   },
 
 ];

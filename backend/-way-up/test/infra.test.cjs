@@ -196,3 +196,24 @@ test("mentor stream: przerwanie przez klienta nie zapisuje urwanej odpowiedzi", 
   assert.equal(events.some((e) => e.type === "done"), false);
   assert.equal(saved.length, 0);
 });
+
+test("pytania bazowe typu slider spełniają ten sam kontrakt co generowane", () => {
+  const { QUESTION_BANK } = require("../dist/questions/questions.data.js");
+  const { normalizeQuestion } = require("../dist/questions/questions.validation.js");
+  const sliders = QUESTION_BANK.filter((q) => q.type === "slider");
+  assert.ok(sliders.length >= 2);
+  for (const q of sliders) {
+    const result = normalizeQuestion({ type: "slider", text: q.text, minLabel: q.minLabel, maxLabel: q.maxLabel });
+    assert.equal(result.ok, true, `${q.id} "${q.text}": ${result.reason}`);
+  }
+});
+
+test("numeracja zasad w promptach jest ciągła i bez powtórzeń", () => {
+  const { PROFILE_SYSTEM_PROMPT } = require("../dist/profile/profile.prompts.js");
+  const { SYSTEM_PROMPT } = require("../dist/quiz/quiz.constants.js");
+  for (const prompt of [PROFILE_SYSTEM_PROMPT, SYSTEM_PROMPT]) {
+    const rules = prompt.slice(prompt.indexOf("ZASADY:"));
+    const numbers = [...rules.matchAll(/^(\d+)\. /gm)].map((m) => Number(m[1]));
+    assert.deepEqual(numbers, numbers.map((_, i) => i + 1));
+  }
+});

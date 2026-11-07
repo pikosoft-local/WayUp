@@ -19,9 +19,12 @@ import LinkOffRoundedIcon from "@mui/icons-material/LinkOffRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import ShareRoundedIcon from "@mui/icons-material/ShareRounded";
 import { apiRequest } from "../api";
+import { draftStorageKey, readDraft, saveQuestionSet } from "../quizDraft";
 import { ConfirmDeleteResultDialog, DeleteAccountDialog } from "../components/deleteDialogs";
 import { supabase } from "../auth/supabaseClient";
 import { useAuth } from "../auth/useAuth";
+
+const NO_QUESTIONS = [];
 
 function getErrorMessage(error, fallback) {
   return error instanceof Error ? error.message : fallback;
@@ -50,34 +53,6 @@ function flattenQuestions(data) {
   );
   if (!questions.length) throw new Error("Serwer nie zwrócił pytań do quizu.");
   return questions;
-}
-
-function draftStorageKey(userId) {
-  return `wayup.quizDraft.${userId}`;
-}
-
-function readDraft(userId) {
-  const emptyDraft = { answers: {}, page: 0, followUps: [] };
-  if (!userId) return emptyDraft;
-
-  try {
-    const savedDraft = sessionStorage.getItem(draftStorageKey(userId));
-    if (!savedDraft) return emptyDraft;
-    const draft = JSON.parse(savedDraft);
-    return {
-      answers:
-        draft.answers && typeof draft.answers === "object" && !Array.isArray(draft.answers)
-          ? draft.answers
-          : {},
-      page: Number.isInteger(draft.page) && draft.page >= 0 ? draft.page : 0,
-      followUps: Array.isArray(draft.followUps) ? draft.followUps.slice(0, 3) : [],
-    };
-  } catch {
-    return {
-      ...emptyDraft,
-      error: "Nie udało się odczytać szkicu quizu z tej przeglądarki.",
-    };
-  }
 }
 
 function QuestionInput({ question, value, onChange }) {
@@ -553,8 +528,8 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
 
 function MeetYou() {
   const { session, loading: checkingSession, authError } = useAuth();
-  const [questions, setQuestions] = useState([]);
-  const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [fetchedSet, setFetchedSet] = useState(null);
+  const [questionsFailed, setQuestionsFailed] = useState(false);
   const [draftState, setDraftState] = useState(() => readDraft(session?.user?.id));
   const [draftUserId, setDraftUserId] = useState(session?.user?.id ?? null);
   const [followUpQuestion, setFollowUpQuestion] = useState(null);
@@ -566,7 +541,6 @@ function MeetYou() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-  const [questionsToken, setQuestionsToken] = useState(null);
   const [resultToDelete, setResultToDelete] = useState(null);
   const [deletingResult, setDeletingResult] = useState(false);
   const [deleteResultError, setDeleteResultError] = useState("");
@@ -574,28 +548,38 @@ function MeetYou() {
   const currentDraft =
     draftUserId === session?.user?.id ? draftState : readDraft(session?.user?.id);
   const { answers, page, followUps } = currentDraft;
+  const userId = session?.user?.id ?? null;
+
+  const questionSet = currentDraft.questionSet ?? fetchedSet;
+  const questions = questionSet?.questions ?? NO_QUESTIONS;
+  const questionsToken = questionSet?.token ?? null;
+  const questionsLoading = !questionSet && !questionsFailed;
+  const hasSavedSet = Boolean(currentDraft.questionSet);
 
   useEffect(() => {
+    if (checkingSession || !userId || hasSavedSet) return undefined;
     let active = true;
     apiRequest("/questions", { auth: false })
       .then((data) => {
-        const questionsFromApi = flattenQuestions(data);
-        if (active) {
-          setQuestions(questionsFromApi);
-          // Token potwierdza, na jaki zestaw pytań odpowiadamy – odsyłamy go razem z odpowiedziami.
-          setQuestionsToken(typeof data.questionsToken === "string" ? data.questionsToken : null);
-        }
+        const loadedQuestions = flattenQuestions(data);
+        if (!active) return;
+        const nextSet = {
+          questions: loadedQuestions,
+          token: typeof data.questionsToken === "string" ? data.questionsToken : null,
+          savedAt: Date.now(),
+        };
+        setFetchedSet(nextSet);
+        saveQuestionSet(userId, nextSet);
       })
       .catch((requestError) => {
-        if (active) setError(getErrorMessage(requestError, "Nie udało się pobrać pytań."));
-      })
-      .finally(() => {
-        if (active) setQuestionsLoading(false);
+        if (!active) return;
+        setError(getErrorMessage(requestError, "Nie udało się pobrać pytań."));
+        setQuestionsFailed(true);
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [checkingSession, userId, hasSavedSet]);
 
   useEffect(() => {
     if (!session) return undefined;
@@ -633,6 +617,7 @@ function MeetYou() {
       answers: currentDraft.answers,
       page: currentDraft.page,
       followUps: currentDraft.followUps,
+      questionSet,
       ...changes,
     };
     setDraftState(nextDraft);
