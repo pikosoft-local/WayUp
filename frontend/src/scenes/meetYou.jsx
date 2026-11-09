@@ -24,6 +24,7 @@ import { ConfirmDeleteResultDialog, DeleteAccountDialog } from "../components/de
 import { supabase } from "../auth/supabaseClient";
 import { useAuth } from "../auth/useAuth";
 
+// Pusta tablica pozwala bezpiecznie renderować ekran, zanim pytania przyjdą z API.
 const NO_QUESTIONS = [];
 
 function getErrorMessage(error, fallback) {
@@ -64,6 +65,7 @@ function QuestionInput({ question, value, onChange }) {
   const label = question.text;
 
   if (question.type === "text") {
+    // Pytanie tekstowe używa wielowierszowego pola z limitem 500 znaków.
     return (
       <TextField
         className="question-text"
@@ -80,6 +82,7 @@ function QuestionInput({ question, value, onChange }) {
   }
 
   if (question.type === "choice") {
+    // RadioGroup pozwala wybrać dokładnie jedną opcję.
     return (
       <RadioGroup
         className="answer-options"
@@ -100,6 +103,7 @@ function QuestionInput({ question, value, onChange }) {
   }
 
   if (question.type === "multi") {
+    // Checkboxy przechowują kilka zaznaczonych identyfikatorów w tablicy.
     const selected = Array.isArray(value) ? value : [];
     return (
       <div className="answer-options answer-grid" role="group" aria-label={label}>
@@ -128,6 +132,7 @@ function QuestionInput({ question, value, onChange }) {
   }
 
   if (question.type === "slider") {
+    // Suwak zapisujemy jako tekst, bo odpowiedzi quizu mają wspólny format.
     const min = question.min ?? 0;
     const max = question.max ?? 100;
     return (
@@ -152,15 +157,18 @@ function QuestionInput({ question, value, onChange }) {
 }
 
 function TraitsRadar({ traits }) {
+  // Wszystkie punkty wykresu liczymy względem środka kwadratu SVG.
   const center = 100;
   const radius = 72;
   const pointsAtScale = (scale) =>
+    // Siatka pokazuje poziomy 25%, 50%, 75% i 100%.
     traits.map((trait, index) => {
       const angle = -Math.PI / 2 + (index * Math.PI * 2) / traits.length;
       const pointRadius = radius * scale;
       return `${center + Math.cos(angle) * pointRadius},${center + Math.sin(angle) * pointRadius}`;
     }).join(" ");
   const profilePoints = traits.map((trait, index) => {
+    // Wartość cechy ograniczamy do zakresu 0-100, żeby wykres nie wyszedł poza ramy.
     const angle = -Math.PI / 2 + (index * Math.PI * 2) / traits.length;
     const value = Math.min(100, Math.max(0, Number(trait.value) || 0));
     const pointRadius = radius * (value / 100);
@@ -208,6 +216,7 @@ function TraitsRadar({ traits }) {
 }
 
 function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onShareChange, onError }) {
+  // Ten komponent pokazuje wygenerowany profil i akcje dostępne dla zapisanego wyniku.
   const [selectedPath, setSelectedPath] = useState("safe");
   const [gapAnalysis, setGapAnalysis] = useState(null);
   const [loadingGap, setLoadingGap] = useState(false);
@@ -224,6 +233,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   const roadmap = profile?.roadmap;
 
   useEffect(() => {
+    // Po zmianie ścieżki pobieramy historię rozmowy z mentorem dla tej ścieżki.
     if (!canLoadDetails || !resultId || !path?.type) return undefined;
     let active = true;
     apiRequest(`/results/${encodeURIComponent(resultId)}/chat?pathType=${encodeURIComponent(path.type)}`)
@@ -242,6 +252,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }, [canLoadDetails, resultId, path?.type, onError]);
 
   async function handleGapAnalysis() {
+    // Analiza luk porównuje obecne umiejętności użytkownika z wybraną ścieżką.
     if (!path) return;
     setLoadingGap(true);
     setGapAnalysis(null);
@@ -258,6 +269,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   async function handleShare() {
+    // Backend tworzy token, a frontend buduje z niego publiczny link i kopiuje go.
     setShareMessage("");
     try {
       const data = await apiRequest(`/results/${encodeURIComponent(resultId)}/share`, {
@@ -275,6 +287,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   async function handleUnshare() {
+    // Usunięcie udostępnienia unieważnia token po stronie backendu.
     setShareMessage("");
     try {
       await apiRequest(`/results/${encodeURIComponent(resultId)}/share`, { method: "DELETE" });
@@ -287,6 +300,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   async function handlePdfDownload() {
+    // PDF przychodzi jako Blob, więc tworzymy tymczasowy link do pobrania pliku.
     if (downloadingPdf) return;
     setDownloadingPdf(true);
     try {
@@ -313,6 +327,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   async function handleSendChat(event) {
+    // Formularz wysyła pytanie do mentora i od razu dopisuje obie wiadomości do widoku.
     event.preventDefault();
     const message = chatText.trim();
     if (!message || message.length > 1000 || !path) return;
@@ -338,6 +353,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   if (!profile) {
+    // Wynik może istnieć bez profilu, jeśli generowanie AI zakończyło się częściowo.
     return (
       <section className="profile-panel">
         <div className="section-label">Twoja rekomendacja</div>
@@ -347,6 +363,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
   }
 
   const roadmapStages = [
+    // Ujednolicamy etykiety etapów, żeby łatwo wyrenderować je w pętli.
     ["3 miesiące", roadmap?.months3],
     ["6 miesięcy", roadmap?.months6],
     ["12 miesięcy", roadmap?.months12],
@@ -354,6 +371,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
 
   return (
     <section className="profile-panel">
+      {/* Najpierw pokazujemy główny archetyp wybrany przez AI. */}
       {profile.archetype && (
         <header className="archetype-card">
           <div className="section-label">Twój archetyp</div>
@@ -364,6 +382,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {Array.isArray(profile.traits) && profile.traits.length > 0 && (
+        /* Wykres renderujemy tylko wtedy, gdy backend zwrócił cechy. */
         <section className="profile-section">
           <h3>Twoje mocne strony</h3>
           <TraitsRadar traits={profile.traits} />
@@ -371,6 +390,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {paths.length > 0 && (
+        /* Zakładki pozwalają przełączać się między trzema możliwymi kierunkami. */
         <section className="profile-section">
           <h3>Możliwe ścieżki</h3>
           <div className="path-tabs" role="tablist" aria-label="Wybierz ścieżkę kariery">
@@ -414,6 +434,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
               {profile.disclaimer && <p className="profile-disclaimer">{profile.disclaimer}</p>}
 
               {canLoadDetails && (
+                /* Szczegóły z API są dostępne tylko dla wyniku zapisanego na koncie. */
                 <>
                   <Button
                     variant="outlined"
@@ -442,6 +463,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {profile.skills && (
+        /* Kompetencje dzielimy na praktyczne i miękkie. */
         <section className="profile-section skills-grid">
           {["hard", "soft"].map((kind) => (
             <div key={kind}>
@@ -454,6 +476,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {roadmap && (
+        /* Roadmapa pokazuje konkretne działania w kolejnych przedziałach czasu. */
         <section className="profile-section">
           <h3>Plan pierwszych kroków</h3>
           <div className="roadmap-grid">
@@ -468,6 +491,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {profile.learningAreas?.length > 0 && (
+        /* Dodatkowe obszary opisują tematy, które użytkownik może dalej sprawdzić. */
         <section className="profile-section">
           <h3>Obszary do odkrycia</h3>
           <div className="learning-list">
@@ -479,6 +503,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {canLoadDetails && (
+        /* Te przyciski działają dla zapisanych wyników: PDF, udostępnienie i unieważnienie linku. */
         <section className="profile-section profile-actions">
           <Button
             variant="contained"
@@ -500,6 +525,7 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
       )}
 
       {canLoadDetails && path && (
+        /* Mentor korzysta z aktualnie wybranej ścieżki i historii rozmowy. */
         <section className="profile-section mentor-section">
           <h3>Zapytaj mentora AI o ścieżkę: {path.title}</h3>
           <div className="mentor-messages" aria-live="polite">
@@ -531,9 +557,12 @@ function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onS
 }
 
 function MeetYou() {
+  // Główny ekran obsługuje quiz, zapis szkicu, historię wyników i konto użytkownika.
   const { session, loading: checkingSession, authError } = useAuth();
+  // Pytania pobrane z API trzymamy osobno od pytań zapisanych w szkicu.
   const [fetchedSet, setFetchedSet] = useState(null);
   const [questionsFailed, setQuestionsFailed] = useState(false);
+  // Szkic jest odczytywany przy starcie, żeby odtworzyć poprzedni postęp quizu.
   const [draftState, setDraftState] = useState(() => readDraft(session?.user?.id));
   const [draftUserId, setDraftUserId] = useState(session?.user?.id ?? null);
   const [followUpQuestion, setFollowUpQuestion] = useState(null);
@@ -549,11 +578,13 @@ function MeetYou() {
   const [deletingResult, setDeletingResult] = useState(false);
   const [deleteResultError, setDeleteResultError] = useState("");
   const [accountDialogOpen, setAccountDialogOpen] = useState(false);
+  // Gdy zmieni się konto, nie pokazujemy szkicu należącego do poprzedniego użytkownika.
   const currentDraft =
     draftUserId === session?.user?.id ? draftState : readDraft(session?.user?.id);
   const { answers, page, followUps } = currentDraft;
   const userId = session?.user?.id ?? null;
 
+  // Preferujemy zestaw zapisany w szkicu, a dopiero później dane pobrane z serwera.
   const questionSet = currentDraft.questionSet ?? fetchedSet;
   const questions = questionSet?.questions ?? NO_QUESTIONS;
   const questionsToken = questionSet?.token ?? null;
@@ -561,6 +592,7 @@ function MeetYou() {
   const hasSavedSet = Boolean(currentDraft.questionSet);
 
   useEffect(() => {
+    // Pytania pobieramy tylko po zalogowaniu i tylko wtedy, gdy nie ma ważnego szkicu.
     if (checkingSession || !userId || hasSavedSet) return undefined;
     let active = true;
     apiRequest("/questions", { auth: false })
@@ -586,6 +618,7 @@ function MeetYou() {
   }, [checkingSession, userId, hasSavedSet]);
 
   useEffect(() => {
+    // Historia wyników jest prywatna, dlatego pobieramy ją z autoryzowanym żądaniem.
     if (!session) return undefined;
     let active = true;
     apiRequest("/results")
@@ -604,6 +637,7 @@ function MeetYou() {
     };
   }, [session]);
 
+  // Z tych wartości wyliczamy zawartość aktualnego kroku i pasek postępu.
   const currentQuestion = questions[page];
   const progress = questions.length ? ((page + 1) / questions.length) * 100 : 0;
   const visibleError = error || currentDraft.error;
@@ -617,6 +651,7 @@ function MeetYou() {
   if (!session) return <Navigate to="/konto?next=/meetYou" replace />;
 
   function updateDraft(changes) {
+    // Każda zmiana odpowiedzi lub strony jest od razu zapisywana w sessionStorage.
     const nextDraft = {
       answers: currentDraft.answers,
       page: currentDraft.page,
@@ -635,12 +670,14 @@ function MeetYou() {
   }
 
   function updateAnswer(value) {
+    // Aktualizujemy tylko odpowiedź bieżącego pytania, zachowując pozostałe odpowiedzi.
     updateDraft({
       answers: { ...answers, [currentQuestion.id]: value },
     });
   }
 
   async function loadPreviousResult(item) {
+    // Kliknięcie historii pobiera pełny wynik i przewija ekran na jego początek.
     setError("");
     setNotice("");
     try {
@@ -653,6 +690,7 @@ function MeetYou() {
   }
 
   async function requestFollowUp() {
+    // Backend generuje maksymalnie trzy dodatkowe pytania na podstawie dotychczasowych odpowiedzi.
     if (followUps.length >= 3 || followUpLoading) return;
     setFollowUpLoading(true);
     setError("");
@@ -674,6 +712,7 @@ function MeetYou() {
   }
 
   function saveFollowUp() {
+    // Odpowiedź dodatkowa jest zamieniana na czytelny tekst i dopisywana do szkicu.
     const selected = followUpQuestion.options?.find((option) => option.id === followUpAnswer);
     const answer = selected?.label ?? followUpAnswer.trim();
     if (!answer) {
@@ -688,6 +727,7 @@ function MeetYou() {
   }
 
   async function submitQuiz() {
+    // Wysyłamy odpowiedzi dopiero po sprawdzeniu, czy użytkownik odpowiedział choć raz.
     if (answerCount === 0) {
       setError("Odpowiedz przynajmniej na jedno pytanie.");
       return;
@@ -741,12 +781,14 @@ function MeetYou() {
   }
 
   function handleShareChange(resultId, shared) {
+    // Po udostępnieniu lub unieważnieniu linku aktualizujemy właściwy element historii.
     setHistory((previous) =>
       previous.map((item) => (item.id === resultId ? { ...item, shared } : item)),
     );
   }
 
   async function confirmDeleteResult() {
+    // Usunięcie wyniku kasuje go z serwera i z lokalnej listy historii.
     if (!resultToDelete || deletingResult) return;
     setDeletingResult(true);
     setDeleteResultError("");
@@ -766,6 +808,7 @@ function MeetYou() {
   }
 
   async function handleSignOut() {
+    // Wylogowanie wykonujemy przez Supabase, żeby sesja została unieważniona także po stronie klienta.
     if (!supabase) {
       setError("Nie można wylogować — brakuje konfiguracji Supabase.");
       return;
@@ -775,11 +818,13 @@ function MeetYou() {
   }
 
   if (questionsLoading || loadingHistory) {
+    // Nie pokazujemy pustego quizu, gdy pytania albo historia są jeszcze pobierane.
     return <main className="loading-page"><CircularProgress aria-label="Ładowanie quizu" /></main>;
   }
 
   return (
     <main className="quiz-page">
+      {/* Nagłówek zawiera markę, adres e-mail i przycisk wylogowania. */}
       <header className="quiz-header">
         <Link className="brand" to="/">wayUp<span>.</span></Link>
         <div className="account-controls">
@@ -791,6 +836,7 @@ function MeetYou() {
       </header>
 
       <div className="quiz-layout">
+        {/* Lewa kolumna zawiera quiz albo aktualnie otwarty wynik. */}
         <section className="quiz-panel" aria-live="polite">
           <Link className="back-link quiz-back" to="/">
             <ArrowBackRoundedIcon /> Strona główna
@@ -800,7 +846,9 @@ function MeetYou() {
           {visibleError && <Alert severity="error" className="quiz-alert">{visibleError}</Alert>}
           {notice && <Alert severity={notice.startsWith("Porada") ? "warning" : "success"} className="quiz-alert">{notice}</Alert>}
 
+          {/* Komunikaty są wspólne dla quizu i widoku wyniku. */}
           {result ? (
+            /* Po wysłaniu quizu pokazujemy poradę, profil i akcje wyniku. */
             <div className="result-view">
               <div className="quiz-heading">
                 <p className="eyebrow">Twój wayUp</p>
@@ -844,6 +892,7 @@ function MeetYou() {
               </div>
             </div>
           ) : (
+            /* Bez wyniku pokazujemy pytanie, postęp i opcjonalne pytania dodatkowe. */
             <>
               <div className="quiz-heading">
                 <p className="eyebrow">{currentQuestion?.blockTitle ?? "Twoja droga zaczyna się od Ciebie"}</p>
@@ -852,6 +901,7 @@ function MeetYou() {
               </div>
 
               {currentQuestion && (
+                /* Nawigacja pozwala przechodzić między pytaniami bez utraty szkicu. */
                 <>
                   <div className="question-progress">
                     <div className="progress-caption">
@@ -897,6 +947,7 @@ function MeetYou() {
               )}
 
               {page === questions.length - 1 && (
+                /* Panel dodatkowych pytań pojawia się dopiero na ostatnim pytaniu. */
                 <section className="follow-up-panel">
                   <div>
                     <strong>Doprecyzuj profil (opcjonalnie)</strong>
@@ -942,6 +993,7 @@ function MeetYou() {
           )}
         </section>
 
+        {/* Prawa kolumna pokazuje wyniki zapisane na koncie użytkownika. */}
         <aside className="saved-results" aria-label="Twoje zapisane wyniki">
           <div className="section-label">Twoje konto</div>
           <h2>Twoje odkrycia</h2>
