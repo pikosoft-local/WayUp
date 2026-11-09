@@ -5,12 +5,14 @@ import { apiRequest } from "../api";
 
 function Share() {
   const { token } = useParams();
+  // Karta udostępnionego profilu jest pobierana na podstawie tokenu z adresu URL.
   const [card, setCard] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let active = true;
+    // Publiczny endpoint nie wymaga zalogowania, dlatego auth ustawiamy na false.
     apiRequest(`/share/${encodeURIComponent(token)}`, { auth: false })
       .then((data) => {
         if (!data.card) throw new Error("Nie udało się odczytać udostępnionego profilu.");
@@ -24,6 +26,7 @@ function Share() {
       });
 
     return () => {
+      // Nie aktualizujemy stanu, jeśli komponent zniknął przed odpowiedzią serwera.
       active = false;
     };
   }, [token]);

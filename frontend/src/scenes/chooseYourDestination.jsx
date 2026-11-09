@@ -18,6 +18,7 @@ import mineEntranceImage from "../assets/goldminingstart.jpg";
 import trailImage from "../assets/obj321.jpg";
 
 const steps = [
+  // Te trzy kroki opisują prostą ścieżkę użytkownika przez produkt.
   {
     icon: <ExploreRoundedIcon />,
     number: "01",
@@ -67,6 +68,7 @@ const team = [
 ];
 
 function formatDate(value) {
+  // Datę z API zamieniamy na czytelny polski format.
   if (!value) return "Najnowsze";
 
   const date = new Date(value);
@@ -80,6 +82,7 @@ function formatDate(value) {
 }
 
 function NewsSection() {
+  // Sekcja aktualności ma własny stan ładowania, błędu i wybranego artykułu.
   const [news, setNews] = useState({ status: "loading", articles: [], message: "" });
   const [retry, setRetry] = useState(0);
   const [selectedArticle, setSelectedArticle] = useState(null);
@@ -90,6 +93,7 @@ function NewsSection() {
   useEffect(() => {
     let active = true;
 
+    // Pobieramy publiczne aktualności bez wymagania logowania.
     apiRequest("/news", { auth: false })
       .then((response) => {
         if (!response?.ok || !Array.isArray(response.articles)) {
@@ -113,6 +117,7 @@ function NewsSection() {
   }, [retry]);
 
   function retryLoadingNews() {
+    // Zwiększenie retry uruchamia efekt pobierający dane jeszcze raz.
     setNews({ status: "loading", articles: [], message: "" });
     setRetry((value) => value + 1);
   }
@@ -120,6 +125,7 @@ function NewsSection() {
   useEffect(() => {
     if (!selectedArticle) return undefined;
 
+    // Po otwarciu dialogu przenosimy fokus do przycisku zamknięcia.
     articleCloseRef.current?.focus();
 
     function handleDialogKeys(event) {

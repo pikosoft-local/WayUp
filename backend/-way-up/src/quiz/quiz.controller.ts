@@ -37,6 +37,7 @@ export class QuizController {
     @Body(ParseSubmissionPipe) submission: QuizSubmission,
     @CurrentUser() user: AuthUser,
   ): Promise<QuizSuccessResponse> {
+    // Jeden identyfikator łączy logi, wygenerowany wynik i rekord zapisany w bazie.
     const requestId = randomUUID();
     this.logger.log(`[${requestId}] user=${user.id} ${JSON.stringify(submission)}`);
 
@@ -60,6 +61,7 @@ export class QuizController {
     }
 
     const saved = await this.results.insert({
+      // Zapisujemy odpowiedzi razem z poradą i profilem, aby wynik można było później otworzyć.
       id: requestId,
       user_id: user.id,
       answers: toStoredAnswers(submission),

@@ -11,6 +11,7 @@ import {
 } from "@mui/material";
 
 function TextQuestion({ label, value, onChange, placeholder = "Nie musisz mieć gotowej odpowiedzi" }) {
+  // useId tworzy unikalne połączenie etykiety z polem formularza.
   const id = React.useId();
 
   return (
@@ -37,6 +38,7 @@ function TextQuestion({ label, value, onChange, placeholder = "Nie musisz mieć 
 }
 
 function RadioQuestion({ label, options, value, onChange }) {
+  // RadioGroup pozwala wybrać dokładnie jedną odpowiedź.
   const id = React.useId();
 
   return (
@@ -64,10 +66,12 @@ function RadioQuestion({ label, options, value, onChange }) {
 }
 
 function MultiSelectQuestion({ label, options, value, onChange }) {
+  // Dla checkboxów przechowujemy tablicę zaznaczonych wartości.
   const id = React.useId();
   const selected = Array.isArray(value) ? value : [];
 
   function toggle(option) {
+    // Kliknięcie ponownie usuwa opcję, a pierwsze kliknięcie ją dodaje.
     onChange(
       selected.includes(option)
         ? selected.filter((item) => item !== option)

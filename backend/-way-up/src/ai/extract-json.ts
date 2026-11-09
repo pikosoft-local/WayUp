@@ -1,4 +1,5 @@
 export function extractJson(raw: string): unknown {
+  // Model może zwrócić JSON w kilku formatach, dlatego przygotowujemy kilka kandydatów.
   const candidates: string[] = [raw.trim()];
 
   const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/i);
@@ -10,6 +11,7 @@ export function extractJson(raw: string): unknown {
 
   for (const candidate of candidates) {
     try {
+      // Zwracamy pierwszy fragment, który faktycznie jest poprawnym JSON-em.
       return JSON.parse(candidate);
     } catch {
     }

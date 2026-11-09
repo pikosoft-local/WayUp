@@ -3,10 +3,12 @@ import { supabase } from "./auth/supabaseClient";
 
 const API_URL = (import.meta.env.VITE_API_URL || "http://localhost:3000").replace(/\/+$/, "");
 
+// Wspólna funkcja do wysyłania zapytań do backendu.
 export async function apiRequest(path, { method = "GET", body, auth = true, responseType } = {}) {
   const headers = {};
 
   if (auth) {
+    // Token pobieramy z aktualnej sesji Supabase, żeby backend mógł sprawdzić użytkownika.
     if (!supabase) {
       throw new Error("Brakuje konfiguracji Supabase. Sprawdź ustawienia VITE_SUPABASE_URL i VITE_SUPABASE_ANON_KEY.");
     }
@@ -20,6 +22,7 @@ export async function apiRequest(path, { method = "GET", body, auth = true, resp
   }
 
   try {
+    // Axios składa pełny adres z adresu serwera i ścieżki endpointu.
     const response = await axios.request({
       url: `${API_URL}${path}`,
       method,
@@ -30,6 +33,7 @@ export async function apiRequest(path, { method = "GET", body, auth = true, resp
 
     return response.data;
   } catch (requestError) {
+    // Backend może zwrócić błąd jako JSON albo jako plik Blob przy pobieraniu PDF-a.
     let responseError = requestError.response?.data?.error;
     if (!responseError && requestError.response?.data instanceof Blob) {
       try {

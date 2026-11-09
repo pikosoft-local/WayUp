@@ -7,6 +7,7 @@ interface OkFalseBody {
 }
 
 const isOkFalse = (body: unknown): body is OkFalseBody =>
+  // Sprawdzamy kształt odpowiedzi, zanim użyjemy jej jako obiektu błędu.
   typeof body === 'object' && body !== null && (body as OkFalseBody).ok === false;
 
 @Catch()
@@ -14,6 +15,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger('Exceptions');
 
   catch(exception: unknown, host: ArgumentsHost): void {
+    // Wszystkie nieobsłużone wyjątki zamieniamy na jednolity format JSON API.
     const response = host.switchToHttp().getResponse<Response>();
 
     if (exception instanceof HttpException) {
@@ -21,6 +23,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       const body = exception.getResponse();
 
       if (isOkFalse(body)) {
+        // Błędy, które już mają właściwy format, zwracamy bez dodatkowego opakowania.
         response.status(status).json(body);
         return;
       }

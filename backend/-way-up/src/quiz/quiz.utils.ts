@@ -3,6 +3,7 @@ import { Question } from '../questions/questions.types';
 import { AnswerValue, QuizAnswers, QuizSubmission, StoredAnswer } from './quiz.types';
 
 export function answerParts(value: AnswerValue): string[] {
+  // Ujednolicamy pojedynczą odpowiedź i tablicę odpowiedzi do jednej tablicy tekstów.
   return (Array.isArray(value) ? value : [value]).map((v) => v.trim()).filter((v) => v !== '');
 }
 
@@ -18,11 +19,13 @@ export function describeAnswer(question: Question | undefined, value: AnswerValu
   const parts = answerParts(value);
 
   if (question?.type === 'slider' && parts.length === 1 && /^-?\d+(\.\d+)?$/.test(parts[0])) {
+    // Wartość suwaka ograniczamy do bezpiecznego zakresu 0-100.
     const n = Math.min(SLIDER_MAX, Math.max(SLIDER_MIN, Math.round(Number(parts[0]))));
     return `${n}/100 (0 = ${question.minLabel}, 100 = ${question.maxLabel})`;
   }
 
   if (question?.options) {
+    // Do zapisu używamy identyfikatorów, ale użytkownikowi pokazujemy czytelne etykiety.
     const labels = new Map(question.options.map((o) => [o.id, o.label]));
     return parts.map((p) => labels.get(p) ?? p).join(', ');
   }
@@ -31,6 +34,7 @@ export function describeAnswer(question: Question | undefined, value: AnswerValu
 }
 
 export function formatSubmission({ answers, followUps }: QuizSubmission): string {
+  // Budujemy tekst, który później trafia do promptu modelu AI.
   const lines: string[] = [];
 
   for (const [id, value] of Object.entries(answers)) {
@@ -48,6 +52,7 @@ export function formatSubmission({ answers, followUps }: QuizSubmission): string
 }
 
 export function toStoredAnswers({ answers, followUps }: QuizSubmission): StoredAnswer[] {
+  // Przygotowujemy dane w formacie wygodnym do zapisania w bazie.
   const stored: StoredAnswer[] = Object.entries(answers).map(([id, answer]) => {
     const question = QUESTIONS_BY_ID.get(id);
     return {

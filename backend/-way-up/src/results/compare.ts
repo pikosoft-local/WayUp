@@ -17,9 +17,11 @@ export interface Comparison {
 }
 
 const value = (profile: Profile, key: TraitKey) =>
+  // Brakująca cecha dostaje neutralną wartość 50.
   profile.traits.find((t) => t.key === key)?.value ?? 50;
 
 export function compareProfiles(mine: Profile, friend: Profile): Comparison {
+  // Porównujemy każdą cechę, a różnicę zapisujemy jako wartość bezwzględną.
   const traits: TraitComparison[] = TRAIT_KEYS.map((key) => {
     const me = value(mine, key);
     const fr = value(friend, key);
@@ -27,6 +29,7 @@ export function compareProfiles(mine: Profile, friend: Profile): Comparison {
   });
 
   const averageDiff = traits.reduce((sum, t) => sum + t.diff, 0) / traits.length;
+  // Im mniejsza średnia różnica, tym większy wynik podobieństwa.
   const score = Math.round(100 - averageDiff);
 
   const byDiff = [...traits].sort((a, b) => a.diff - b.diff);

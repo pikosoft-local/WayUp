@@ -5,6 +5,7 @@ import { AppModule } from './app.module';
 import { AllExceptionsFilter } from './common/all-exceptions.filter';
 
 async function createApp(): Promise<INestApplication> {
+  // Tworzymy i konfigurujemy instancję NestJS wspólną dla lokalnego serwera i Vercela.
   const app = await NestFactory.create(AppModule);
   app.enableCors();
   app.useGlobalFilters(new AllExceptionsFilter());
@@ -21,12 +22,14 @@ async function bootstrap(): Promise<void> {
 }
 
 if (process.env.NODE_ENV !== 'production') {
+  // Lokalnie uruchamiamy zwykły serwer HTTP; Vercel używa funkcji handler poniżej.
   bootstrap();
 }
 
 let vercelApp: Promise<INestApplication> | undefined;
 
 export default async function handler(req: VercelRequest, res: VercelResponse): Promise<void> {
+  // Jedną instancję aplikacji wykorzystujemy dla kolejnych żądań serverless.
   vercelApp ??= createApp();
   const app = await vercelApp;
   const instance = app.getHttpAdapter().getInstance();

@@ -21,11 +21,13 @@ export class GroqService {
   private readonly model: string;
 
   constructor(config: ConfigService) {
+    // Klucz API jest wymagany, więc brak konfiguracji zatrzymuje start usługi.
     this.client = new Groq({ apiKey: config.getOrThrow<string>('GROQ_API_KEY') });
     this.model = config.get<string>('GROQ_MODEL') ?? 'openai/gpt-oss-20b';
   }
 
   async complete(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
+    // Ustawiamy wartości domyślne, aby każdy moduł nie musiał konfigurować ich osobno.
     const params = {
       model: this.model,
       temperature: options.temperature ?? 0.85,
@@ -41,6 +43,7 @@ export class GroqService {
       );
     } catch (err) {
       if (options.json && err instanceof Groq.APIError && err.status === 400) {
+        // Nie każdy model obsługuje response_format, więc ponawiamy bez wymuszania JSON-a.
         this.logger.warn(`Tryb JSON odrzucony (${err.message}), ponawiam bez niego`);
         completion = await this.client.chat.completions.create(params);
       } else {

@@ -10,7 +10,9 @@ import { SupabaseModule } from './supabase/supabase.module';
 
 @Module({
   imports: [
+    // ConfigModule ładuje zmienne środowiskowe i udostępnia je w całej aplikacji.
     ConfigModule.forRoot({ isGlobal: true }),
+    // Każdy moduł grupuje powiązane endpointy i serwisy konkretnej funkcji.
     SupabaseModule,
     AiModule,
     QuestionsModule,

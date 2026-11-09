@@ -19,6 +19,7 @@ import { PATH_TYPES, PathType } from '../profile/profile.schema';
 import { MentorService } from './mentor.service';
 
 const chatBodySchema = z.object({
+  // Walidujemy tekst rozmowy przed przekazaniem go do modelu AI.
   pathType: z.enum(PATH_TYPES),
   message: z.string().trim().min(1).max(1000),
 });
@@ -33,6 +34,7 @@ export class MentorController {
 
   @Get()
   async history(
+    // Historia jest dostępna tylko dla właściciela wyniku, co sprawdza serwis.
     @Param('id', UUID_PIPE) id: string,
     @Query(new ZodValidationPipe(historyQuerySchema)) query: { pathType: PathType },
     @CurrentUser() user: AuthUser,

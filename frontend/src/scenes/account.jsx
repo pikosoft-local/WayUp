@@ -6,6 +6,7 @@ import { useAuth } from "../auth/useAuth";
 import { supabase } from "../auth/supabaseClient";
 
 function Account() {
+  // Pobieramy stan sesji, żeby wiedzieć, czy pokazać formularz logowania.
   const { session, loading: checkingSession, authError } = useAuth();
   const [searchParams] = useSearchParams();
   const [busy, setBusy] = useState(false);
@@ -22,6 +23,7 @@ function Account() {
   if (session) return <Navigate to={destination} replace />;
 
   async function handleGoogleSignIn() {
+    // Czyścimy poprzedni błąd przed rozpoczęciem nowej próby logowania.
     setError("");
     if (!supabase) {
       setError("Brakuje konfiguracji Supabase. Uzupełnij VITE_SUPABASE_URL i VITE_SUPABASE_ANON_KEY.");
@@ -30,6 +32,7 @@ function Account() {
 
     setBusy(true);
     try {
+      // Supabase przekieruje użytkownika do Google i po powrocie wróci do wskazanej strony.
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: {

@@ -15,6 +15,7 @@ export class AuthGuard implements CanActivate {
   constructor(private readonly supabase: SupabaseService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    // Guard uruchamia się przed endpointem i sprawdza token Bearer w nagłówku.
     const request = context.switchToHttp().getRequest<AuthenticatedRequest>();
     const token = this.extractToken(request.headers.authorization);
 
@@ -35,10 +36,12 @@ export class AuthGuard implements CanActivate {
     }
 
     request.user = { id: data.user.id, email: data.user.email };
+    // Zapisujemy użytkownika w request, aby kontroler mógł go później odczytać.
     return true;
   }
 
   private extractToken(header?: string): string | null {
+    // Akceptujemy wyłącznie nagłówek w formacie: Bearer <token>.
     const [scheme, token] = header?.split(' ') ?? [];
     return scheme?.toLowerCase() === 'bearer' && token ? token : null;
   }

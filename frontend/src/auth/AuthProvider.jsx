@@ -3,6 +3,7 @@ import { supabase } from "./supabaseClient";
 import { AuthContext } from "./authContext";
 
 export function AuthProvider({ children }) {
+  // session przechowuje dane zalogowanego użytkownika albo null, gdy nikt nie jest zalogowany.
   const [session, setSession] = useState(null);
   const [loading, setLoading] = useState(Boolean(supabase));
   const [authError, setAuthError] = useState("");
@@ -11,6 +12,7 @@ export function AuthProvider({ children }) {
     if (!supabase) return undefined;
 
     let active = true;
+    // Nasłuchujemy zmian logowania i wylogowania w całej aplikacji.
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_event, nextSession) => {
@@ -29,6 +31,7 @@ export function AuthProvider({ children }) {
         }
       })
       .catch(() => {
+        // Błąd pobierania sesji pokazujemy użytkownikowi zamiast udawać, że wszystko działa.
         if (active) {
           setAuthError("Nie udało się sprawdzić sesji. Sprawdź połączenie i spróbuj ponownie.");
           setLoading(false);
@@ -36,6 +39,7 @@ export function AuthProvider({ children }) {
       });
 
     return () => {
+      // Po odmontowaniu komponentu przestajemy reagować na stare zdarzenia.
       active = false;
       subscription.unsubscribe();
     };

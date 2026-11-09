@@ -21,10 +21,12 @@ import { supabase } from "../auth/supabaseClient";
 import { useAuth } from "../auth/useAuth";
 
 function getErrorMessage(error, fallback) {
+  // Błędy z aplikacji mają czytelny message, a pozostałe dostają tekst zastępczy.
   return error instanceof Error ? error.message : fallback;
 }
 
 function cleanMentorText(text) {
+  // Odpowiedź AI może zawierać Markdown, którego nie chcemy pokazywać w interfejsie.
   return String(text ?? "")
     .replace(/```[a-z]*\n?/gi, "")
     .replace(/`([^`]*)`/g, "$1")
@@ -36,6 +38,7 @@ function cleanMentorText(text) {
 }
 
 function flattenQuestions(data) {
+  // Backend grupuje pytania w bloki, a ekran quizu potrzebuje jednej tablicy.
   if (!Array.isArray(data?.blocks)) {
     throw new Error("Serwer zwrócił nieprawidłowy format pytań.");
   }
@@ -50,10 +53,12 @@ function flattenQuestions(data) {
 }
 
 function draftStorageKey(userId) {
+  // Szkic jest oddzielny dla każdego użytkownika, aby konta nie mieszały odpowiedzi.
   return `wayup.quizDraft.${userId}`;
 }
 
 function readDraft(userId) {
+  // Odczyt szkicu pozwala wrócić do quizu po odświeżeniu strony.
   const emptyDraft = { answers: {}, page: 0, followUps: [] };
   if (!userId) return emptyDraft;
 
@@ -78,6 +83,7 @@ function readDraft(userId) {
 }
 
 function QuestionInput({ question, value, onChange }) {
+  // Ten komponent wybiera właściwy rodzaj pola na podstawie typu pytania.
   const options = question.options ?? [];
   const label = question.text;
 

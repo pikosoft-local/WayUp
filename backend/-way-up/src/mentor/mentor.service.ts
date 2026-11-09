@@ -21,12 +21,14 @@ export class MentorService {
   ) {}
 
   async history(userId: string, resultId: string, pathType: PathType) {
+    // Najpierw sprawdzamy, czy wynik należy do użytkownika.
     const result = await this.results.findOwned(resultId, userId);
     if (!result) throw notFound('Nie znaleziono wyniku.');
     return this.messages.thread(resultId, pathType);
   }
 
   async chat(userId: string, resultId: string, pathType: PathType, message: string) {
+    // Rozmowa korzysta z profilu i odpowiedzi zapisanych dla konkretnego wyniku.
     const result = await this.results.findOwned(resultId, userId);
     if (!result) throw notFound('Nie znaleziono wyniku.');
     if (!result.profile) {
@@ -41,6 +43,7 @@ export class MentorService {
     const recent = await this.messages.thread(resultId, pathType, HISTORY_WINDOW);
 
     const conversation: ChatMessage[] = [
+      // Prompt systemowy daje mentorowi kontekst, a potem dokładamy ostatnie wiadomości.
       {
         role: 'system',
         content: mentorSystemPrompt({
@@ -64,6 +67,7 @@ export class MentorService {
       this.groq.complete([...conversation, languageReminder], { temperature: 0.8, maxTokens: 1500 });
 
     let rawReply = await ask();
+    // Jeśli model odpowie po angielsku, wykonujemy maksymalnie dwie dodatkowe próby.
     for (let attempt = 1; attempt <= 2 && looksEnglish(rawReply); attempt++) {
       this.logger.warn(`[${resultId}] Odpowiedź mentora po angielsku, ponawiam ${attempt}/2`);
       rawReply = await ask();
