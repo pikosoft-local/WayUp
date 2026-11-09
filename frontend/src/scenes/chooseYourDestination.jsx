@@ -16,6 +16,7 @@ import goldVeinImage from "../assets/bg_gold.jpg";
 import goldVaultImage from "../assets/bg_gold2.jpg";
 import mineEntranceImage from "../assets/goldminingstart.jpg";
 import trailImage from "../assets/obj321.jpg";
+import "./privacyCenter.css";
 
 const steps = [
   // Te trzy kroki opisują prostą ścieżkę użytkownika przez produkt.
@@ -482,7 +483,9 @@ function PrivacyCenter({ activeTab, onTabChange, onClose, openerRef }) {
         </div>
         <div className="privacy-draft-note" role="note">
           Wersja robocza — przed publicznym uruchomieniem wymaga weryfikacji
-          podstaw prawnych, okresów przechowywania i dostawców usług.
+          prawnej: podstawy prawnej przetwarzania, zasad dla osób
+          niepełnoletnich oraz warunków przekazywania danych poza Europejski
+          Obszar Gospodarczy.
         </div>
         <div className="privacy-tabs" role="tablist" aria-label="Informacje o prywatności">
           {tabs.map((tab) => (
@@ -514,22 +517,81 @@ function PrivacyCenter({ activeTab, onTabChange, onClose, openerRef }) {
                 Gilewicz</strong>. Kontakt w sprawach prywatności:{" "}
                 <a href="mailto:pawelgilewicz2009@gmail.com">pawelgilewicz2009@gmail.com</a>.
               </p>
-              <h3>Jakie dane przetwarza wayUp?</h3>
+              <h3>Jakie dane zbieramy i po co?</h3>
+              <p>Tylko te, które są potrzebne, żeby quiz, wyniki i mentor działały:</p>
+              <ul>
+                <li>
+                  konto — przy logowaniu przez Google dostajemy adres e-mail i
+                  identyfikator konta (Google może przekazać też imię i zdjęcie
+                  profilowe, ale ich nie wyświetlamy),
+                </li>
+                <li>
+                  Twoje odpowiedzi w quizie, w tym odpowiedzi na pytania
+                  dodatkowe wpisane własnymi słowami,
+                </li>
+                <li>
+                  wynik — porada, profil (archetyp, cechy, ścieżki, umiejętności,
+                  plan) i data jego utworzenia,
+                </li>
+                <li>Twoje wiadomości do mentora AI i jego odpowiedzi,</li>
+                <li>
+                  podstawowe dane techniczne zapisywane przez hosting, np. adres
+                  IP i czas żądania. Treści Twoich odpowiedzi nie trafiają do
+                  logów serwera.
+                </li>
+              </ul>
+              <h3>Kto jeszcze ma dostęp do danych?</h3>
+              <ul>
+                <li>
+                  <strong>Supabase</strong> — obsługuje logowanie i przechowuje
+                  konto, odpowiedzi, wyniki oraz rozmowy z mentorem,
+                </li>
+                <li><strong>Google</strong> — obsługuje logowanie kontem Google,</li>
+                <li>
+                  <strong>Groq</strong> — dostawca AI. Wysyłamy tam Twoje
+                  odpowiedzi i wiadomości do mentora, żeby wygenerować wynik i
+                  odpowiedzi. To firma z USA, więc te treści mogą być
+                  przetwarzane poza Europejskim Obszarem Gospodarczym,
+                </li>
+                <li><strong>Vercel</strong> — hosting aplikacji.</li>
+              </ul>
+              <p>Nie sprzedajemy danych i nie używamy ich do reklam.</p>
+              <h3>Udostępnianie wyniku</h3>
               <p>
-                Przy logowaniu przetwarzane są dane konta przekazane przez
-                Supabase Auth. Odpowiedzi quizu i wygenerowane wyniki są wysyłane
-                do backendu wayUp, który korzysta z Supabase do zapisu wyników
-                oraz z Groq do generowania odpowiedzi AI. Wpisy w sekcji
-                aktualności są tworzone przez AI na podstawie publicznych
-                kanałów RSS.
+                Gdy klikniesz „Udostępnij wynik”, powstaje publiczny link. Każdy,
+                kto go ma, zobaczy nazwę i opis Twojego profilu, wykres cech,
+                tytuły proponowanych ścieżek i datę utworzenia. Nie zobaczy
+                Twoich odpowiedzi, adresu e-mail ani rozmów z mentorem. Link
+                wyłączysz w każdej chwili przyciskiem „Przestań udostępniać”,
+                a usunięcie wyniku też go wyłącza.
               </p>
-              <h3>Co trzeba uzupełnić przed publikacją?</h3>
+              <h3>Jak długo trzymamy dane i jak je usunąć?</h3>
               <p>
-                Podstawę prawną i okres przechowywania danych, zasady dotyczące
-                osób niepełnoletnich, lokalizacje i warunki przetwarzania u
-                dostawców oraz procedurę realizacji praw użytkownika. Nie
-                przesyłaj w quizie danych wrażliwych ani informacji, których nie
-                chcesz przekazywać do usługi AI.
+                Dane zostają, dopóki ich nie usuniesz — nie kasujemy ich
+                automatycznie. W aplikacji możesz usunąć pojedynczy wynik razem
+                z rozmową z mentorem („Usuń ten wynik”) albo całe konto ze
+                wszystkimi danymi („Usuń konto i dane” w panelu „Twoje
+                odkrycia”). Usunięcie jest trwałe. Kopie zapasowe u dostawców
+                usług oraz dane, które wcześniej przetworzył Groq, podlegają ich
+                własnym zasadom przechowywania, na które wayUp nie ma wpływu.
+              </p>
+              <h3>Twoje prawa</h3>
+              <p>
+                Masz prawo dostępu do danych, ich sprostowania, usunięcia,
+                ograniczenia przetwarzania, sprzeciwu oraz przeniesienia. Swoje
+                wyniki zobaczysz w aplikacji i pobierzesz jako PDF, a usuniesz
+                je samodzielnie. W pozostałych sprawach, np. gdy chcesz kopię
+                wszystkich danych, napisz na{" "}
+                <a href="mailto:pawelgilewicz2009@gmail.com">pawelgilewicz2009@gmail.com</a>.
+                Odpowiemy w ciągu miesiąca. Możesz też złożyć skargę do Prezesa
+                Urzędu Ochrony Danych Osobowych (
+                <a href="https://uodo.gov.pl" target="_blank" rel="noreferrer noopener">uodo.gov.pl</a>
+                ).
+              </p>
+              <h3>Czego nie wpisywać</h3>
+              <p>
+                Nie wpisuj w quizie danych wrażliwych, np. o zdrowiu, ani
+                informacji, których nie chcesz przekazywać usłudze AI.
               </p>
             </>
           )}
@@ -538,9 +600,11 @@ function PrivacyCenter({ activeTab, onTabChange, onClose, openerRef }) {
               <h3>Niezbędne działanie aplikacji</h3>
               <p>
                 wayUp nie uruchamia analitycznych ani reklamowych plików
-                cookies. Supabase Auth utrzymuje sesję logowania w pamięci
-                przeglądarki, a niedokończony quiz może być tymczasowo
-                przechowany w sessionStorage tej karty.
+                cookies. Supabase Auth zapisuje sesję logowania w pamięci
+                lokalnej przeglądarki (localStorage), a niedokończony quiz —
+                Twoje odpowiedzi i wylosowane pytania — jest tymczasowo
+                przechowywany w sessionStorage tej karty. Szkic znika po
+                zamknięciu karty, wysłaniu quizu lub usunięciu konta.
               </p>
               <h3>Wybór użytkownika</h3>
               <p>

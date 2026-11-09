@@ -1,12 +1,15 @@
-import { Controller, Get, Param, Post, Delete, UseGuards, Query, Res } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
-import { ResultsService } from './results.service';
+import { AuthGuard } from '../auth/auth.guard';
+import { AuthUser } from '../auth/auth.types';
+import { CurrentUser } from '../auth/current-user.decorator';
+import { UUID_PIPE } from '../common/errors';
 import { GapAnalysisService } from './gap-analysis.service';
 import { PdfService } from './pdf.service';
-import { AuthGuard } from '../auth/auth.guard';
-import { CurrentUser } from '../auth/current-user.decorator';
+import { ResultsService } from './results.service';
 
 @Controller('results')
+@UseGuards(AuthGuard)
 export class ResultsController {
   constructor(
     private readonly resultsService: ResultsService,
@@ -14,47 +17,40 @@ export class ResultsController {
     private readonly pdfService: PdfService,
   ) {}
 
-  @UseGuards(AuthGuard)
   @Get()
-  async getResults(@CurrentUser() user: any) {
-    return { items: await this.resultsService.list(user.id) };
+  async getResults(@CurrentUser() user: AuthUser) {
+    return { ok: true, items: await this.resultsService.list(user.id) };
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id')
-  async getResultById(@CurrentUser() user: any, @Param('id') id: string) {
-    return this.resultsService.get(user.id, id);
+  async getResultById(@CurrentUser() user: AuthUser, @Param('id', UUID_PIPE) id: string) {
+    return { ok: true, ...(await this.resultsService.get(user.id, id)) };
   }
 
-  @UseGuards(AuthGuard)
   @Post(':id/share')
-  async shareResult(@CurrentUser() user: any, @Param('id') id: string) {
-    const shareToken = await this.resultsService.share(user.id, id);
-    return { shareToken };
+  async shareResult(@CurrentUser() user: AuthUser, @Param('id', UUID_PIPE) id: string) {
+    return { ok: true, shareToken: await this.resultsService.share(user.id, id) };
   }
 
-  @UseGuards(AuthGuard)
   @Delete(':id/share')
-  async unshareResult(@CurrentUser() user: any, @Param('id') id: string) {
+  async unshareResult(@CurrentUser() user: AuthUser, @Param('id', UUID_PIPE) id: string) {
     await this.resultsService.unshare(user.id, id);
     return { ok: true };
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id/gap-analysis')
   async getGapAnalysis(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Param('id', UUID_PIPE) id: string,
     @Query('pathType') pathType: string = 'safe',
   ) {
     return this.gapAnalysisService.analyzeGaps(user.id, id, pathType);
   }
 
-  @UseGuards(AuthGuard)
   @Get(':id/pdf')
   async downloadPdf(
-    @CurrentUser() user: any,
-    @Param('id') id: string,
+    @CurrentUser() user: AuthUser,
+    @Param('id', UUID_PIPE) id: string,
     @Res() res: Response,
   ) {
     const pdfBuffer = await this.pdfService.generateProfilePdf(user.id, id);
@@ -63,7 +59,6 @@ export class ResultsController {
       'Content-Type': 'application/pdf',
       'Content-Disposition': `attachment; filename=profil-kariery-${id}.pdf`,
       'Content-Length': pdfBuffer.length,
-      'Cache-Control': 'private, no-store',
     });
 
     res.end(pdfBuffer);
@@ -76,7 +71,7 @@ export class ShareController {
 
   @Get(':token')
   async getSharedResult(@Param('token') token: string) {
-    return this.resultsService.publicCard(token);
+    return { ok: true, card: await this.resultsService.publicCard(token) };
   }
 }
 
@@ -87,10 +82,10 @@ export class CompareController {
   @UseGuards(AuthGuard)
   @Get(':token')
   async compareResults(
-    @CurrentUser() user: any,
+    @CurrentUser() user: AuthUser,
     @Param('token') token: string,
     @Query('resultId') resultId?: string,
   ) {
-    return this.resultsService.compare(user.id, token, resultId);
+    return { ok: true, ...(await this.resultsService.compare(user.id, token, resultId)) };
   }
 }

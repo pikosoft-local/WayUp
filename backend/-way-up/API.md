@@ -19,9 +19,9 @@ Zawsze `{ "ok": false, "error": "komunikat PL" }`.
 | 400 | złe dane / limit | pokaż `error` |
 | 401 | brak / wygasły token | wyloguj, pokaż logowanie, zachowaj odpowiedzi |
 | 404 | nie ma zasobu lub nie należy do użytkownika | pokaż `error` |
-| 429 | limit wiadomości do mentora (50 na wynik) | pokaż `error` |
+| 429 | za dużo zapytań (nagłówek `Retry-After` w sekundach) albo limit 50 wiadomości do mentora na wynik | pokaż `error`; przy `Retry-After` odczekaj |
 | 500 | błąd generowania AI / bazy | pokaż `error`, pozwól ponowić |
-| 503 | niedostępna wyszukiwarka lub brak konfiguracji aktualności | pokaż `error`, pozwól ponowić |
+| 503 | serwer AI chwilowo przeciążony, niedostępna wyszukiwarka lub brak konfiguracji aktualności | pokaż `error`, pozwól ponowić za chwilę |
 
 ## Endpointy
 
@@ -76,9 +76,10 @@ Odpowiedź:
 ```json
 {
   "ok": true,
-  "version": 1,
+  "version": 2,
   "slider": { "min": 0, "max": 100 },
   "maxFollowUps": 3,
+  "questionsToken": "<podpisany token>",
   "blocks": [
     {
       "id": 1,
@@ -96,6 +97,8 @@ Odpowiedź:
 
 20 pytań (id `"0"`–`"19"`), 4 bloki po 5. Typy: `text` (pole tekstowe), `choice` (jedna opcja), `multi` (kilka opcji), `slider` (suwak 0–100 z opisami końców). Pytania są publiczne, więc można je pobrać przed logowaniem. `version` zmienia się po zmianie pytań.
 
+**`questionsToken` – obowiązkowy do poprawnej pracy.** Pytania 5–19 są generowane przez AI osobno dla każdego wczytania quizu. Token to podpisany zestaw pytań, który serwer odtwarza przy wysyłce, żeby przypisać odpowiedzi do właściwych pytań (bez niego przy wielu użytkownikach naraz odpowiedzi mogą dostać cudze etykiety albo dostać 400 „Nieznane pytanie”). **Zapisz token razem z pytaniami i odsyłaj go w każdym `SendHandler` i `POST /questions/follow-up`.** Token ważny 24 h; po wygaśnięciu serwer zwraca 400 – wczytaj quiz od nowa. Limit: 30 wczytań na minutę z jednego IP (429).
+
 ## Wysyłka quizu – 🔒 `POST /SendHandler`
 
 Body (`Content-Type: application/json`):
@@ -103,7 +106,8 @@ Body (`Content-Type: application/json`):
 ```json
 {
   "answers": { "0": "liceum", "2": "70", "5": ["gry", "sport"], "1": "Minecraft" },
-  "followUps": [{ "question": "Co Cię kręci w grach?", "answer": "Mechaniki" }]
+  "followUps": [{ "question": "Co Cię kręci w grach?", "answer": "Mechaniki" }],
+  "questionsToken": "<token z GET /questions>"
 }
 ```
 
@@ -119,7 +123,8 @@ Format odpowiedzi w `answers` (klucz = `id` pytania):
 - Pytania można pomijać, ale min. 1 odpowiedź musi być niepusta.
 - Limity: tekst max 500 znaków, tablica max 20 elementów, nieznane `id` → 400.
 - `followUps` jest opcjonalne (max 3). Dla pytania z `choice` wyślij **etykietę** wybranej opcji jako `answer`.
-- Dopuszczalny jest też stary, płaski format (sam obiekt `answers` bez opakowania).
+- Dopuszczalny jest też stary, płaski format (sam obiekt `answers` bez opakowania), ale nie może on przenosić `questionsToken`, więc nie używaj go z pytaniami dynamicznymi.
+- Limit: 5 wysyłek na 10 minut na użytkownika (429).
 
 Odpowiedź 200:
 
@@ -180,13 +185,13 @@ Odpowiedź 200:
 
 ## Pytanie dodatkowe – 🔒 `POST /questions/follow-up`
 
-Body jak w `SendHandler` (dotychczasowe `answers` + ewentualne `followUps`). Odpowiedź 200:
+Body jak w `SendHandler` (dotychczasowe `answers` + ewentualne `followUps` + `questionsToken`). Odpowiedź 200:
 
 ```json
 { "ok": true, "question": { "id": "f1", "type": "choice", "text": "...", "options": [{ "id": "o1", "label": "Fabuła" }] } }
 ```
 
-`type` to `text` albo `choice` (`options` tylko dla `choice`). `id` to `f1`…`f3` (kolejne według liczby `followUps` w body). Max 3; przy limicie 400. Po odpowiedzi użytkownika dodaj parę `{question: text, answer}` do `followUps` i wyślij całość w `SendHandler`. Funkcja opcjonalna – przy błędzie 500 po prostu pomiń.
+`type` to `text`, `choice`, `multi` albo `slider` (`options` dla `choice`/`multi`, `min`/`max`/`minLabel`/`maxLabel` dla `slider`; ostatnia opcja `choice`/`multi` to zawsze wyjście awaryjne: „Żadna z tych” / „Żadne z tych”). `id` to `f1`…`f3` (kolejne według liczby `followUps` w body). Max 3; przy limicie 400. Po odpowiedzi użytkownika dodaj parę `{question: text, answer}` do `followUps` i wyślij całość w `SendHandler`. Funkcja opcjonalna – przy błędzie albo `"question": null` (np. przeciążony AI) po prostu pomiń. Limit: 10 na minutę na użytkownika (429).
 
 ## Wyniki
 
@@ -263,6 +268,15 @@ Karta nie zawiera odpowiedzi z quizu ani danych konta – tylko to, co widać po
 
 `score` 0–100 (100 = identyczne cechy), `level`: `high` (≥80), `medium` (60–79), `low`. Gdy użytkownik nie ma jeszcze wyniku → 404 z komunikatem "Najpierw wypełnij quiz…" (przekieruj do quizu).
 
+## Usuwanie danych (RODO)
+
+- 🔒 `DELETE /results/:id` → `{ "ok": true }`. Usuwa wynik razem z odpowiedziami, profilem i rozmową z mentorem. Publiczny link do tego wyniku przestaje działać (404). Cudzy lub nieistniejący wynik → 404. Limit: 20 na minutę.
+- 🔒 `DELETE /results/:id/share` → `{ "ok": true }`. Unieważnia tylko link do udostępniania (wynik zostaje). Ponowne `POST /results/:id/share` tworzy **nowy** token.
+- 🔒 `DELETE /account` z body `{ "confirm": "USUŃ" }` → `{ "ok": true }`. Usuwa **wszystkie** wyniki, rozmowy z mentorem i samo konto logowania. Operacji nie da się cofnąć. Bez poprawnego `confirm` → 400. Limit: 3 na 10 minut.
+  - Gdy dane zostały usunięte, ale konta nie udało się usunąć, serwer zwraca 500 z komunikatem – można bezpiecznie ponowić (operacja jest idempotentna).
+  - Po sukcesie front czyści lokalny szkic quizu i wylogowuje **lokalnie**: `supabase.auth.signOut({ scope: 'local' })`. Zwykłe `signOut()` próbowałoby unieważnić sesję na serwerze dla użytkownika, który już nie istnieje.
+  - Poza zasięgiem tego endpointu: kopie zapasowe bazy po stronie Supabase oraz dane, które zostały wcześniej przetworzone przez dostawcę AI (Groq). Warto to wpisać w politykę prywatności.
+
 ## Mentor AI
 
 Rozmowa z AI wcielającym się w mentora wybranej ścieżki. Każda para (wynik, `pathType`) ma osobny wątek z historią.
@@ -279,7 +293,52 @@ Rozmowa z AI wcielającym się w mentora wybranej ścieżki. Każda para (wynik,
 { "ok": true, "messages": [{ "role": "user", "content": "...", "createdAt": "ISO" }, { "role": "assistant", "content": "...", "createdAt": "ISO" }] }
 ```
 
-Od najstarszej, do 200 ostatnich. Mentor przedstawia się jako AI. Odpowiedź trwa kilka sekund – pokaż wskaźnik pisania. Limit 50 wiadomości użytkownika na wynik (potem 429). Wynik bez `profile` → 400.
+Od najstarszej, do 200 ostatnich. Mentor przedstawia się jako AI. Odpowiedź trwa kilka sekund – pokaż wskaźnik pisania. Limit 50 wiadomości użytkownika na wynik (potem 429) oraz 15 wiadomości na minutę na użytkownika (429 z `Retry-After`). Wynik bez `profile` → 400.
+
+- 🔒 `POST /results/:id/chat/stream` – to samo co wyżej, ale odpowiedź przychodzi **na żywo** (Server-Sent Events). Body i limity jak w zwykłym czacie. Błędy sprzed startu (400/401/404/429) wracają jako zwykły JSON z kodem HTTP; dopiero potem odpowiedź ma `Content-Type: text/event-stream` i zdarzenia:
+
+```
+event: delta
+data: {"text":"Cześć, "}
+
+event: done
+data: {"ok":true,"reply":"Cześć, to jest cały tekst.","pathType":"safe","saved":true}
+
+event: error
+data: {"ok":false,"error":"Nie udało się wygenerować odpowiedzi."}
+```
+
+  `delta` – kolejny fragment do doklejenia. `done` – **ostateczny, oczyszczony tekst; podmień nim to, co złożyłeś z deltów** (serwer usuwa Markdown i w razie odpowiedzi po angielsku generuje ją ponownie). `error` – błąd w trakcie (np. przeciążony AI), pokaż komunikat. `EventSource` nie obsługuje POST ani nagłówka `Authorization`, więc użyj `fetch`:
+
+```js
+const res = await fetch(`${API}/results/${id}/chat/stream`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+  body: JSON.stringify({ pathType, message }),
+});
+if (!res.ok) return showError((await res.json()).error); // błąd sprzed streamu
+
+const reader = res.body.getReader();
+const decoder = new TextDecoder();
+let buffer = '';
+let text = '';
+for (;;) {
+  const { done, value } = await reader.read();
+  if (done) break;
+  buffer += decoder.decode(value, { stream: true });
+  const frames = buffer.split('\n\n');
+  buffer = frames.pop(); // niedokończona ramka zostaje na później
+  for (const frame of frames) {
+    const event = /^event: (.+)$/m.exec(frame)?.[1];
+    const data = JSON.parse(/^data: (.+)$/m.exec(frame)?.[1] ?? 'null');
+    if (event === 'delta') { text += data.text; render(text); }
+    else if (event === 'done') render(data.reply);
+    else if (event === 'error') showError(data.error);
+  }
+}
+```
+
+  Przerwanie połączenia (zamknięcie karty, `AbortController`) przerywa generowanie i urwana odpowiedź **nie** jest zapisywana w historii.
 
 ## Checklista frontu
 
@@ -292,4 +351,7 @@ Od najstarszej, do 200 ostatnich. Mentor przedstawia się jako AI. Odpowiedź tr
 - [ ] Pobieranie PDF przez `fetch` z tokenem (blob), nie zwykłym linkiem
 - [ ] Udostępnianie: token → link, publiczna strona `/share/:token`, porównanie
 - [ ] Czat z mentorem per ścieżka
-- [ ] Obsługa kodów 400 / 401 / 404 / 429 / 500, loader przy `SendHandler` i czacie
+- [ ] Usuwanie wyniku, unieważnianie linku i usuwanie konta (z potwierdzeniem wpisaniem „USUŃ”)
+- [ ] Obsługa kodów 400 / 401 / 404 / 429 / 500 / 503, loader przy `SendHandler` i czacie
+- [ ] Zapisanie `questionsToken` z `GET /questions` i odsyłanie go w `SendHandler` oraz `follow-up`
+- [ ] Czat mentora przez `POST /results/:id/chat/stream` (fallback: zwykły `POST /results/:id/chat`)

@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   HttpCode,
+  HttpException,
   HttpStatus,
   InternalServerErrorException,
   Logger,
@@ -10,6 +11,7 @@ import {
 } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { AuthGuard } from '../auth/auth.guard';
+import { RateLimit, RateLimitGuard } from '../common/rate-limit.guard';
 import { AuthUser } from '../auth/auth.types';
 import { CurrentUser } from '../auth/current-user.decorator';
 import { Profile } from '../profile/profile.schema';
@@ -32,6 +34,8 @@ export class QuizController {
   ) {}
 
   @Post('SendHandler')
+  @UseGuards(RateLimitGuard)
+  @RateLimit({ name: 'send', limit: 5, windowSec: 600 })
   @HttpCode(HttpStatus.OK)
   async sendHandler(
     @Body(ParseSubmissionPipe) submission: QuizSubmission,
@@ -39,17 +43,19 @@ export class QuizController {
   ): Promise<QuizSuccessResponse> {
     // Jeden identyfikator łączy logi, wygenerowany wynik i rekord zapisany w bazie.
     const requestId = randomUUID();
-    this.logger.log(`[${requestId}] user=${user.id} ${JSON.stringify(submission)}`);
+    this.logger.log(
+      `[${requestId}] user=${user.id} odpowiedzi=${Object.keys(submission.answers).length} pytania_dodatkowe=${submission.followUps.length}`,
+    );
 
     let result: string;
     let profile: Profile | null;
     try {
-      // Porada i profil generują się równolegle; profile.generate nigdy nie rzuca.
       [result, profile] = await Promise.all([
         this.quizService.generateAdvice(submission, requestId),
         this.profileService.generate(submission, requestId),
       ]);
     } catch (err) {
+      if (err instanceof HttpException) throw err;
       this.logger.error(
         `[${requestId}] ${err instanceof Error ? err.message : String(err)}`,
         err instanceof Error ? err.stack : undefined,

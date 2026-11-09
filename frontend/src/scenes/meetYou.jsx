@@ -14,11 +14,17 @@ import { Link, Navigate } from "react-router-dom";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
 import DownloadRoundedIcon from "@mui/icons-material/DownloadRounded";
+import DeleteOutlineRoundedIcon from "@mui/icons-material/DeleteOutlineRounded";
+import LinkOffRoundedIcon from "@mui/icons-material/LinkOffRounded";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
 import ShareRoundedIcon from "@mui/icons-material/ShareRounded";
 import { apiRequest } from "../api";
+import { draftStorageKey, readDraft, saveQuestionSet } from "../quizDraft";
+import { ConfirmDeleteResultDialog, DeleteAccountDialog } from "../components/deleteDialogs";
 import { supabase } from "../auth/supabaseClient";
 import { useAuth } from "../auth/useAuth";
+
+const NO_QUESTIONS = [];
 
 function getErrorMessage(error, fallback) {
   // Błędy z aplikacji mają czytelny message, a pozostałe dostają tekst zastępczy.
@@ -52,6 +58,7 @@ function flattenQuestions(data) {
   return questions;
 }
 
+<<<<<<< HEAD
 function draftStorageKey(userId) {
   // Szkic jest oddzielny dla każdego użytkownika, aby konta nie mieszały odpowiedzi.
   return `wayup.quizDraft.${userId}`;
@@ -82,6 +89,8 @@ function readDraft(userId) {
   }
 }
 
+=======
+>>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
 function QuestionInput({ question, value, onChange }) {
   // Ten komponent wybiera właściwy rodzaj pola na podstawie typu pytania.
   const options = question.options ?? [];
@@ -231,11 +240,13 @@ function TraitsRadar({ traits }) {
   );
 }
 
-function ProfileView({ profile, resultId, canLoadDetails, onError }) {
+function ProfileView({ profile, resultId, canLoadDetails, initialShareToken, onShareChange, onError }) {
   const [selectedPath, setSelectedPath] = useState("safe");
   const [gapAnalysis, setGapAnalysis] = useState(null);
   const [loadingGap, setLoadingGap] = useState(false);
-  const [shareLink, setShareLink] = useState("");
+  const [shareLink, setShareLink] = useState(() =>
+    initialShareToken ? `${window.location.origin}/share/${initialShareToken}` : "",
+  );
   const [shareMessage, setShareMessage] = useState("");
   const [chatMessages, setChatMessages] = useState([]);
   const [chatText, setChatText] = useState("");
@@ -288,10 +299,23 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
       if (!data.shareToken) throw new Error("Serwer nie zwrócił linku do udostępnienia.");
       const link = `${window.location.origin}/share/${data.shareToken}`;
       setShareLink(link);
+      onShareChange?.(resultId, true);
       await navigator.clipboard.writeText(link);
       setShareMessage("Link skopiowany do schowka.");
     } catch (error) {
       setShareMessage(getErrorMessage(error, "Nie udało się utworzyć linku."));
+    }
+  }
+
+  async function handleUnshare() {
+    setShareMessage("");
+    try {
+      await apiRequest(`/results/${encodeURIComponent(resultId)}/share`, { method: "DELETE" });
+      setShareLink("");
+      setShareMessage("Link przestał działać. Każdy, kto go ma, zobaczy teraz błąd.");
+      onShareChange?.(resultId, false);
+    } catch (error) {
+      setShareMessage(getErrorMessage(error, "Nie udało się unieważnić linku."));
     }
   }
 
@@ -498,6 +522,11 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
             {downloadingPdf ? "Przygotowuję PDF…" : "Pobierz PDF"}
           </Button>
           <Button variant="outlined" startIcon={<ShareRoundedIcon />} onClick={handleShare}>Udostępnij wynik</Button>
+          {shareLink && (
+            <Button variant="outlined" startIcon={<LinkOffRoundedIcon />} onClick={handleUnshare}>
+              Przestań udostępniać
+            </Button>
+          )}
           {shareLink && <a href={shareLink}>{shareLink}</a>}
           {shareMessage && <span>{shareMessage}</span>}
         </section>
@@ -536,8 +565,8 @@ function ProfileView({ profile, resultId, canLoadDetails, onError }) {
 
 function MeetYou() {
   const { session, loading: checkingSession, authError } = useAuth();
-  const [questions, setQuestions] = useState([]);
-  const [questionsLoading, setQuestionsLoading] = useState(true);
+  const [fetchedSet, setFetchedSet] = useState(null);
+  const [questionsFailed, setQuestionsFailed] = useState(false);
   const [draftState, setDraftState] = useState(() => readDraft(session?.user?.id));
   const [draftUserId, setDraftUserId] = useState(session?.user?.id ?? null);
   const [followUpQuestion, setFollowUpQuestion] = useState(null);
@@ -549,27 +578,45 @@ function MeetYou() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
+  const [resultToDelete, setResultToDelete] = useState(null);
+  const [deletingResult, setDeletingResult] = useState(false);
+  const [deleteResultError, setDeleteResultError] = useState("");
+  const [accountDialogOpen, setAccountDialogOpen] = useState(false);
   const currentDraft =
     draftUserId === session?.user?.id ? draftState : readDraft(session?.user?.id);
   const { answers, page, followUps } = currentDraft;
+  const userId = session?.user?.id ?? null;
+
+  const questionSet = currentDraft.questionSet ?? fetchedSet;
+  const questions = questionSet?.questions ?? NO_QUESTIONS;
+  const questionsToken = questionSet?.token ?? null;
+  const questionsLoading = !questionSet && !questionsFailed;
+  const hasSavedSet = Boolean(currentDraft.questionSet);
 
   useEffect(() => {
+    if (checkingSession || !userId || hasSavedSet) return undefined;
     let active = true;
     apiRequest("/questions", { auth: false })
       .then((data) => {
-        const questionsFromApi = flattenQuestions(data);
-        if (active) setQuestions(questionsFromApi);
+        const loadedQuestions = flattenQuestions(data);
+        if (!active) return;
+        const nextSet = {
+          questions: loadedQuestions,
+          token: typeof data.questionsToken === "string" ? data.questionsToken : null,
+          savedAt: Date.now(),
+        };
+        setFetchedSet(nextSet);
+        saveQuestionSet(userId, nextSet);
       })
       .catch((requestError) => {
-        if (active) setError(getErrorMessage(requestError, "Nie udało się pobrać pytań."));
-      })
-      .finally(() => {
-        if (active) setQuestionsLoading(false);
+        if (!active) return;
+        setError(getErrorMessage(requestError, "Nie udało się pobrać pytań."));
+        setQuestionsFailed(true);
       });
     return () => {
       active = false;
     };
-  }, []);
+  }, [checkingSession, userId, hasSavedSet]);
 
   useEffect(() => {
     if (!session) return undefined;
@@ -607,6 +654,7 @@ function MeetYou() {
       answers: currentDraft.answers,
       page: currentDraft.page,
       followUps: currentDraft.followUps,
+      questionSet,
       ...changes,
     };
     setDraftState(nextDraft);
@@ -644,7 +692,7 @@ function MeetYou() {
     try {
       const data = await apiRequest("/questions/follow-up", {
         method: "POST",
-        body: { answers, followUps },
+        body: { answers, followUps, ...(questionsToken && { questionsToken }) },
       });
       if (!data.question?.id || !data.question?.text) {
         throw new Error("Serwer zwrócił nieprawidłowe pytanie dodatkowe.");
@@ -683,7 +731,7 @@ function MeetYou() {
     try {
       const data = await apiRequest("/SendHandler", {
         method: "POST",
-        body: { answers, followUps },
+        body: { answers, followUps, ...(questionsToken && { questionsToken }) },
       });
       if (!data.ok || typeof data.result !== "string" || !data.requestId) {
         throw new Error("Serwer zwrócił nieprawidłowy wynik quizu.");
@@ -722,6 +770,31 @@ function MeetYou() {
       setError(getErrorMessage(requestError, "Nie udało się wysłać quizu. Spróbuj ponownie."));
     } finally {
       setSubmitting(false);
+    }
+  }
+
+  function handleShareChange(resultId, shared) {
+    setHistory((previous) =>
+      previous.map((item) => (item.id === resultId ? { ...item, shared } : item)),
+    );
+  }
+
+  async function confirmDeleteResult() {
+    if (!resultToDelete || deletingResult) return;
+    setDeletingResult(true);
+    setDeleteResultError("");
+    try {
+      await apiRequest(`/results/${encodeURIComponent(resultToDelete)}`, { method: "DELETE" });
+      setHistory((previous) => previous.filter((item) => item.id !== resultToDelete));
+      setResult(null);
+      setResultToDelete(null);
+      setError("");
+      setNotice("Wynik został usunięty razem z rozmową z mentorem.");
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    } catch (requestError) {
+      setDeleteResultError(getErrorMessage(requestError, "Nie udało się usunąć wyniku."));
+    } finally {
+      setDeletingResult(false);
     }
   }
 
@@ -775,16 +848,33 @@ function MeetYou() {
                 profile={result.profile}
                 resultId={result.id}
                 canLoadDetails={result.saved !== false}
+                initialShareToken={result.shareToken}
+                onShareChange={handleShareChange}
                 onError={setError}
               />
-              <Button variant="outlined" className="restart-quiz-button" onClick={() => {
-                setResult(null);
-                setNotice("");
-                setError("");
-                updateDraft({ answers: {}, followUps: [], page: 0 });
-              }}>
-                Wypełnij quiz ponownie
-              </Button>
+              <div className="result-footer">
+                <Button variant="outlined" className="restart-quiz-button" onClick={() => {
+                  setResult(null);
+                  setNotice("");
+                  setError("");
+                  updateDraft({ answers: {}, followUps: [], page: 0 });
+                }}>
+                  Wypełnij quiz ponownie
+                </Button>
+                {result.saved !== false && (
+                  <Button
+                    variant="outlined"
+                    className="danger-button"
+                    startIcon={<DeleteOutlineRoundedIcon />}
+                    onClick={() => {
+                      setDeleteResultError("");
+                      setResultToDelete(result.id);
+                    }}
+                  >
+                    Usuń ten wynik
+                  </Button>
+                )}
+              </div>
             </div>
           ) : (
             <>
@@ -902,8 +992,28 @@ function MeetYou() {
               ))}
             </div>
           )}
+          <div className="account-danger-zone">
+            <p>Możesz w każdej chwili usunąć konto razem ze wszystkimi wynikami i rozmowami z mentorem.</p>
+            <Button
+              variant="outlined"
+              size="small"
+              className="danger-button"
+              onClick={() => setAccountDialogOpen(true)}
+            >
+              Usuń konto i dane
+            </Button>
+          </div>
         </aside>
       </div>
+
+      <ConfirmDeleteResultDialog
+        open={Boolean(resultToDelete)}
+        busy={deletingResult}
+        error={deleteResultError}
+        onCancel={() => setResultToDelete(null)}
+        onConfirm={confirmDeleteResult}
+      />
+      {accountDialogOpen && <DeleteAccountDialog onClose={() => setAccountDialogOpen(false)} />}
     </main>
   );
 }

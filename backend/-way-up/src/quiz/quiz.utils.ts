@@ -33,13 +33,18 @@ export function describeAnswer(question: Question | undefined, value: AnswerValu
   return parts.join(', ');
 }
 
+<<<<<<< HEAD
 export function formatSubmission({ answers, followUps }: QuizSubmission): string {
   // Budujemy tekst, który później trafia do promptu modelu AI.
+=======
+export function formatSubmission({ answers, followUps, questions }: QuizSubmission): string {
+>>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
   const lines: string[] = [];
+  const lookup = questions ?? QUESTIONS_BY_ID;
 
   for (const [id, value] of Object.entries(answers)) {
     if (!isFilled(value)) continue;
-    const question = QUESTIONS_BY_ID.get(id);
+    const question = lookup.get(id);
     lines.push(`- ${question?.label ?? id}: ${describeAnswer(question, value)}`);
   }
 
@@ -51,10 +56,15 @@ export function formatSubmission({ answers, followUps }: QuizSubmission): string
   return lines.join('\n');
 }
 
+<<<<<<< HEAD
 export function toStoredAnswers({ answers, followUps }: QuizSubmission): StoredAnswer[] {
   // Przygotowujemy dane w formacie wygodnym do zapisania w bazie.
+=======
+export function toStoredAnswers({ answers, followUps, questions }: QuizSubmission): StoredAnswer[] {
+  const lookup = questions ?? QUESTIONS_BY_ID;
+>>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
   const stored: StoredAnswer[] = Object.entries(answers).map(([id, answer]) => {
-    const question = QUESTIONS_BY_ID.get(id);
+    const question = lookup.get(id);
     return {
       id,
       question: question?.label ?? id,

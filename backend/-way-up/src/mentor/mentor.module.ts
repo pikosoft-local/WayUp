@@ -9,5 +9,6 @@ import { MentorService } from './mentor.service';
   imports: [AiModule, ResultsModule],
   controllers: [MentorController],
   providers: [MentorService, MentorRepository],
+  exports: [MentorRepository],
 })
 export class MentorModule {}

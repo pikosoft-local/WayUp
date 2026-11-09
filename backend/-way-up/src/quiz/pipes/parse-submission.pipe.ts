@@ -1,6 +1,12 @@
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { badRequest } from '../../common/errors';
-import { MAX_FOLLOW_UPS, QUESTIONS_BY_ID } from '../../questions/questions.data';
+import {
+  buildQuestionLookup,
+  MAX_FOLLOW_UPS,
+  QUESTIONS_BY_ID,
+} from '../../questions/questions.data';
+import { QuestionsTokenService } from '../../questions/questions-token.service';
+import type { Question } from '../../questions/questions.types';
 import {
   MAX_ANSWER_ITEMS,
   MAX_ANSWER_LENGTH,
@@ -17,26 +23,36 @@ const isPlainObject = (value: unknown): value is PlainObject =>
 
 @Injectable()
 export class ParseSubmissionPipe implements PipeTransform<unknown, QuizSubmission> {
+  constructor(private readonly tokens: QuestionsTokenService) {}
+
   transform(body: unknown): QuizSubmission {
     if (!isPlainObject(body)) {
       throw badRequest('Nieprawidłowy format danych.');
     }
 
     const structured = isPlainObject(body.answers);
-    const answers = this.parseAnswers(structured ? body.answers : body);
+    const questions = structured ? this.resolveQuestions(body.questionsToken) : undefined;
+    const answers = this.parseAnswers(structured ? body.answers : body, questions ?? QUESTIONS_BY_ID);
     const followUps = this.parseFollowUps(structured ? body.followUps : undefined);
 
     if (countFilledAnswers(answers) < MIN_FILLED_ANSWERS) {
       throw badRequest(`Uzupełnij quiz (min. ${MIN_FILLED_ANSWERS} odpowiedzi) przed wysłaniem.`);
     }
 
-    return { answers, followUps };
+    return { answers, followUps, ...(questions && { questions }) };
   }
 
-  private parseAnswers(raw: unknown): QuizAnswers {
+  private resolveQuestions(token: unknown): Map<string, Question> | undefined {
+    if (token === undefined || token === null) return undefined;
+    const dynamic = typeof token === 'string' ? this.tokens.verify(token) : null;
+    if (!dynamic) throw badRequest('Zestaw pytań wygasł lub jest nieprawidłowy. Wczytaj quiz ponownie.');
+    return buildQuestionLookup(dynamic);
+  }
+
+  private parseAnswers(raw: unknown, lookup: ReadonlyMap<string, Question>): QuizAnswers {
     const answers: QuizAnswers = {};
     for (const [id, value] of Object.entries(raw as PlainObject)) {
-      if (!QUESTIONS_BY_ID.has(id)) {
+      if (!lookup.has(id)) {
         throw badRequest(`Nieznane pytanie "${id}".`);
       }
       answers[id] = this.parseValue(value, `Nieprawidłowa odpowiedź dla pytania "${id}".`);

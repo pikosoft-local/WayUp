@@ -71,6 +71,7 @@ function Account() {
 
         <p className="auth-privacy">
           Twoje odpowiedzi i rekomendacje będą przypisane do Twojego konta.
+          Możesz je w każdej chwili usunąć razem z kontem.
         </p>
         <RouterLink className="back-link" to="/">← Wróć na stronę główną</RouterLink>
       </section>

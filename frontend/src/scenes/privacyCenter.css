@@ -1,0 +1,12 @@
+.privacy-tab-panel ul {
+  margin: 0 0 14px;
+  padding-left: 20px;
+}
+
+.privacy-tab-panel li {
+  margin-bottom: 7px;
+}
+
+.privacy-tab-panel li::marker {
+  color: #b8884a;
+}

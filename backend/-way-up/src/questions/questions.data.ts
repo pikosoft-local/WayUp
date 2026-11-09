@@ -1,6 +1,6 @@
 import { Question, QuestionBlock } from './questions.types';
 
-export const QUESTIONS_VERSION = 1;
+export const QUESTIONS_VERSION = 2;
 export const MAX_FOLLOW_UPS = 3;
 export const SLIDER_MIN = 0;
 export const SLIDER_MAX = 100;
@@ -61,9 +61,9 @@ export const QUESTION_BANK: Question[] = [
     block: 1,
     type: 'slider',
     label: 'Miasto czy natura',
-    text: 'Miasto czy natura?',
-    minLabel: 'Miasto',
-    maxLabel: 'Natura',
+    text: 'Gdzie wolisz spędzać czas?',
+    minLabel: 'W mieście',
+    maxLabel: 'Wśród natury',
   },
 
 ];
@@ -71,3 +71,10 @@ export const QUESTION_BANK: Question[] = [
 export const QUESTIONS_BY_ID: Map<string, Question> = new Map(
   QUESTION_BANK.map((question) => [question.id, question]),
 );
+
+export function buildQuestionLookup(dynamic: Question[]): Map<string, Question> {
+  const lookup = new Map<string, Question>();
+  for (const question of QUESTION_BANK) if (question.block === 1) lookup.set(question.id, question);
+  for (const question of dynamic) lookup.set(question.id, question);
+  return lookup;
+}
