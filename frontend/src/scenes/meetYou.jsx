@@ -58,39 +58,6 @@ function flattenQuestions(data) {
   return questions;
 }
 
-<<<<<<< HEAD
-function draftStorageKey(userId) {
-  // Szkic jest oddzielny dla każdego użytkownika, aby konta nie mieszały odpowiedzi.
-  return `wayup.quizDraft.${userId}`;
-}
-
-function readDraft(userId) {
-  // Odczyt szkicu pozwala wrócić do quizu po odświeżeniu strony.
-  const emptyDraft = { answers: {}, page: 0, followUps: [] };
-  if (!userId) return emptyDraft;
-
-  try {
-    const savedDraft = sessionStorage.getItem(draftStorageKey(userId));
-    if (!savedDraft) return emptyDraft;
-    const draft = JSON.parse(savedDraft);
-    return {
-      answers:
-        draft.answers && typeof draft.answers === "object" && !Array.isArray(draft.answers)
-          ? draft.answers
-          : {},
-      page: Number.isInteger(draft.page) && draft.page >= 0 ? draft.page : 0,
-      followUps: Array.isArray(draft.followUps) ? draft.followUps.slice(0, 3) : [],
-    };
-  } catch {
-    return {
-      ...emptyDraft,
-      error: "Nie udało się odczytać szkicu quizu z tej przeglądarki.",
-    };
-  }
-}
-
-=======
->>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
 function QuestionInput({ question, value, onChange }) {
   // Ten komponent wybiera właściwy rodzaj pola na podstawie typu pytania.
   const options = question.options ?? [];

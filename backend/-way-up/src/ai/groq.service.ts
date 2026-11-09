@@ -30,16 +30,7 @@ export class GroqService {
   private readonly model: string;
 
   constructor(config: ConfigService) {
-<<<<<<< HEAD
-    // Klucz API jest wymagany, więc brak konfiguracji zatrzymuje start usługi.
-    this.client = new Groq({ apiKey: config.getOrThrow<string>('GROQ_API_KEY') });
-    this.model = config.get<string>('GROQ_MODEL') ?? 'openai/gpt-oss-20b';
-  }
-
-  async complete(messages: ChatMessage[], options: CompletionOptions = {}): Promise<string> {
-    // Ustawiamy wartości domyślne, aby każdy moduł nie musiał konfigurować ich osobno.
-    const params = {
-=======
+    // Klucz API jest wymagany, a retry i timeout chronią aplikację przed chwilowymi błędami AI.
     this.client = new Groq({
       apiKey: config.getOrThrow<string>('GROQ_API_KEY'),
       maxRetries: SDK_MAX_RETRIES,
@@ -49,8 +40,8 @@ export class GroqService {
   }
 
   private buildParams(messages: ChatMessage[], options: CompletionOptions) {
+    // Wspólne parametry są używane zarówno dla odpowiedzi zwykłej, jak i streamingu.
     return {
->>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
       model: this.model,
       temperature: options.temperature ?? 0.85,
       max_completion_tokens: options.maxTokens ?? 2000,

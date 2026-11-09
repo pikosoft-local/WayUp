@@ -32,17 +32,13 @@ export class MentorService {
     return this.messages.thread(resultId, pathType);
   }
 
-<<<<<<< HEAD
-  async chat(userId: string, resultId: string, pathType: PathType, message: string) {
-    // Rozmowa korzysta z profilu i odpowiedzi zapisanych dla konkretnego wyniku.
-=======
   private async prepare(
     userId: string,
     resultId: string,
     pathType: PathType,
     message: string,
   ): Promise<ChatMessage[]> {
->>>>>>> 8ae61c5ee094b413a802091bdb28071aadaebe56
+    // Najpierw sprawdzamy właściciela wyniku i przygotowujemy kontekst dla modelu.
     const result = await this.results.findOwned(resultId, userId);
     if (!result) throw notFound('Nie znaleziono wyniku.');
     if (!result.profile) {
