@@ -1,3 +1,4 @@
+// Endpointy rozmowy z mentorem AI.
 import {
   Body,
   Controller,

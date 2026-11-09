@@ -1,3 +1,4 @@
+// Endpoint udostępniający wygenerowane aktualności dla użytkownika.
 import { Controller, Get } from '@nestjs/common';
 import { NewsService } from './news.service';
 

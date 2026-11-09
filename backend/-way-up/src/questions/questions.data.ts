@@ -1,3 +1,4 @@
+// Stały bank pytań oraz mapy ułatwiające szybkie wyszukiwanie pytania po ID.
 import { Question, QuestionBlock } from './questions.types';
 
 export const QUESTIONS_VERSION = 2;

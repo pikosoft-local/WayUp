@@ -1,3 +1,4 @@
+// Repozytorium pobierające dane profilu i odpowiedzi potrzebne mentorowi.
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import type { PathType } from '../profile/profile.schema';
 import { SupabaseService } from '../supabase/supabase.service';

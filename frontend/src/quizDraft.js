@@ -1,17 +1,21 @@
+// Funkcje zapisu i odczytu niedokończonego quizu w pamięci przeglądarki.
 export const BASE_QUESTION_COUNT = 5;
 
 export const DRAFT_MAX_AGE_MS = 20 * 60 * 60 * 1000;
 
 export const DRAFT_KEY_PREFIX = "wayup.quizDraft.";
 
+// Tworzymy osobny klucz dla każdego użytkownika, żeby konta nie dzieliły szkicu.
 export function draftStorageKey(userId) {
   return `${DRAFT_KEY_PREFIX}${userId}`;
 }
 
+// Zwracamy pusty szkic, gdy użytkownik jeszcze nic nie zapisał.
 function emptyDraft() {
   return { answers: {}, page: 0, followUps: [], questionSet: null };
 }
 
+// Sprawdzamy, czy zapisany zestaw pytań ma poprawny format i nie jest za stary.
 function parseQuestionSet(raw, now) {
   if (!raw || typeof raw !== "object" || !Array.isArray(raw.questions) || raw.questions.length === 0) {
     return null;
@@ -32,6 +36,7 @@ function parseQuestionSet(raw, now) {
   };
 }
 
+// Odczytujemy szkic z sessionStorage i naprawiamy brakujące lub błędne wartości.
 export function readDraft(userId, now = Date.now()) {
   if (!userId) return emptyDraft();
 
@@ -69,6 +74,7 @@ export function readDraft(userId, now = Date.now()) {
   }
 }
 
+// Zapisujemy aktualny zestaw pytań, aby można było bezpiecznie wrócić do quizu.
 export function saveQuestionSet(userId, questionSet) {
   try {
     const stored = readDraft(userId);

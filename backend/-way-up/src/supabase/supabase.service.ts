@@ -1,3 +1,4 @@
+// Konfiguracja klienta Supabase używanego do komunikacji z bazą danych.
 import { Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { createClient, SupabaseClient } from '@supabase/supabase-js';

@@ -1,3 +1,4 @@
+// Endpointy pobierania pytań oraz generowania pytań dynamicznych i dodatkowych.
 import { Body, Controller, Get, HttpCode, HttpStatus, Post, UseGuards } from '@nestjs/common';
 import { AuthGuard } from '../auth/auth.guard';
 import { RateLimit, RateLimitGuard } from '../common/rate-limit.guard';

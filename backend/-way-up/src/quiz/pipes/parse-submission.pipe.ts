@@ -1,3 +1,4 @@
+// Pipe zamieniający surowe body żądania na bezpieczny format odpowiedzi quizu.
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { badRequest } from '../../common/errors';
 import {

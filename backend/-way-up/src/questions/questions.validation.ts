@@ -1,3 +1,4 @@
+// Walidacja i normalizacja pytań zwracanych przez model AI.
 import { QuestionType } from './questions.types';
 
 export interface NormalizedQuestion {
@@ -19,9 +20,11 @@ const SLIDER_BANNED = /(skal[aięey]|suwak|przesu[ńn]|oce[ńn]|procent|%|\d)/i;
 const LABEL_BANNED = /[<>\/\d%]/;
 const FILLER_OPTIONS = /^(wszystkie powyższe|tak|nie)\.?$/i;
 
+// Liczymy słowa i normalizujemy tekst, aby walidacja działała przewidywalnie.
 const wordCount = (s: string) => s.trim().split(/\s+/).filter(Boolean).length;
 const clean = (v: unknown) => (typeof v === 'string' ? v.replace(/\s+/g, ' ').trim() : '');
 
+// Zamieniamy pytanie na zestaw słów, który można porównać z innym pytaniem.
 function tokens(s: string): Set<string> {
   return new Set(
     s
@@ -32,6 +35,7 @@ function tokens(s: string): Set<string> {
   );
 }
 
+// Sprawdzamy podobieństwo pytań, żeby AI nie wygenerowało duplikatu.
 export function isTooSimilar(a: string, b: string, threshold = 0.5): boolean {
   const ta = tokens(a);
   const tb = tokens(b);
@@ -41,6 +45,7 @@ export function isTooSimilar(a: string, b: string, threshold = 0.5): boolean {
   return common / (ta.size + tb.size - common) >= threshold;
 }
 
+// Sprawdzamy i porządkujemy pytanie AI zgodnie z kontraktem frontendowym.
 export function normalizeQuestion(raw: any, expectedType?: QuestionType): NormalizeResult {
   if (!raw || typeof raw !== 'object') return { ok: false, reason: 'to nie jest obiekt JSON' };
 

@@ -1,3 +1,4 @@
+// Ekran publicznego udostępniania wyniku quizu.
 import { useEffect, useState } from "react";
 import { Alert, CircularProgress } from "@mui/material";
 import { Link, useParams } from "react-router-dom";

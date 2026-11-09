@@ -1,4 +1,6 @@
+// Pomocnicza funkcja wyciągająca poprawny JSON z odpowiedzi modelu AI.
 export function extractJson(raw: string): unknown {
+  // Model czasami dodaje ```json albo komentarz przed JSON-em, więc najpierw czyścimy tekst.
   // Model może zwrócić JSON w kilku formatach, dlatego przygotowujemy kilka kandydatów.
   const candidates: string[] = [raw.trim()];
 

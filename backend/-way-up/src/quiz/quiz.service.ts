@@ -1,3 +1,4 @@
+// Serwis zapisujący odpowiedzi quizu i wywołujący generowanie wyniku.
 import { Injectable, Logger } from '@nestjs/common';
 import { GroqService } from '../ai/groq.service';
 import { EXPECTED_SENTENCES, MAX_RETRIES, SYSTEM_PROMPT } from './quiz.constants';

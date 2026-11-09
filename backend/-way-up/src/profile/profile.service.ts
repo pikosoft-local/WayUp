@@ -1,3 +1,4 @@
+// Serwis generujący profil przyszłości na podstawie odpowiedzi z quizu.
 import { Injectable, Logger } from '@nestjs/common';
 import { extractJson } from '../ai/extract-json';
 import { AiOverloadedException, GroqService } from '../ai/groq.service';

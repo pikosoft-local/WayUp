@@ -1,3 +1,4 @@
+// Prompty AI używane do tworzenia pytań quizowych.
 const SHARED_RULES = `JĘZYK I TON:
 - Po polsku, naturalnie, jak mówi rozsądny dorosły do nastolatka. Bez slangu na siłę, bez belferskiego tonu.
 - Wszystkie pola (text, options, minLabel, maxLabel, label) po polsku. Zero angielskich słów, chyba że są powszechnie używane w polszczyźnie.

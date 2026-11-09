@@ -1,3 +1,4 @@
+// Główny ekran quizu: pytania, szkic, odpowiedzi, wynik profilu i mentor AI.
 import { useEffect, useState } from "react";
 import {
   Alert,

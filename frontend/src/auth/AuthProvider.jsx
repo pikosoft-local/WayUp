@@ -1,3 +1,4 @@
+// Provider autoryzacji. Nasłuchuje sesji Supabase i udostępnia ją całej aplikacji.
 import { useEffect, useState } from "react";
 import { supabase } from "./supabaseClient";
 import { AuthContext } from "./authContext";

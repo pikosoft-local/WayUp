@@ -1,3 +1,4 @@
+// Moduł konta. Rejestruje kontroler i serwis związany z kontem użytkownika.
 import { Module } from '@nestjs/common';
 import { MentorModule } from '../mentor/mentor.module';
 import { ResultsModule } from '../results/results.module';

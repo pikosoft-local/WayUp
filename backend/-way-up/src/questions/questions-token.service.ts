@@ -1,3 +1,4 @@
+// Serwis tworzący i sprawdzający token zestawu pytań quizu.
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createHash, createHmac, timingSafeEqual } from 'node:crypto';

@@ -1,3 +1,4 @@
+// Punkt startowy aplikacji. Tutaj uruchamiamy NestJS i ustawiamy wspólne zasady HTTP.
 import { NestFactory } from '@nestjs/core';
 import { INestApplication, Logger } from '@nestjs/common';
 import { VercelRequest, VercelResponse } from '@vercel/node';

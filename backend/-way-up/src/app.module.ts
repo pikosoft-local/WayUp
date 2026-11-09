@@ -1,3 +1,4 @@
+// Główny moduł aplikacji. Łączy wszystkie moduły funkcjonalne backendu.
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AccountModule } from './account/account.module';

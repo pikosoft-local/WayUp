@@ -1,3 +1,4 @@
+// Funkcje pomocnicze formatujące i sprawdzające odpowiedzi quizu.
 import { QUESTIONS_BY_ID, SLIDER_MAX, SLIDER_MIN } from '../questions/questions.data';
 import { Question } from '../questions/questions.types';
 import { AnswerValue, QuizAnswers, QuizSubmission, StoredAnswer } from './quiz.types';
@@ -8,10 +9,12 @@ export function answerParts(value: AnswerValue): string[] {
 }
 
 export function isFilled(value: AnswerValue): boolean {
+  // Pusta odpowiedź nie powinna trafiać do promptu ani do licznika odpowiedzi.
   return answerParts(value).length > 0;
 }
 
 export function countFilledAnswers(answers: QuizAnswers): number {
+  // Liczymy pytania, na które użytkownik podał przynajmniej jedną wartość.
   return Object.values(answers).filter(isFilled).length;
 }
 
@@ -78,5 +81,6 @@ export function toStoredAnswers({ answers, followUps, questions }: QuizSubmissio
 }
 
 export function countSentences(text: string): number {
+  // Ta funkcja pomaga sprawdzać, czy tekst AI ma oczekiwaną liczbę zdań.
   return (text.match(/[.!?]+(\s|$)/g) || []).length;
 }

@@ -1,3 +1,4 @@
+// Stałe określające minimalne wymagania dla przesyłanego quizu.
 export const MIN_FILLED_ANSWERS = 1;
 export const EXPECTED_SENTENCES = 4;
 export const MAX_RETRIES = 2;

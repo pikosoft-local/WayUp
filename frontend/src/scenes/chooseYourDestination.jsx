@@ -1,3 +1,4 @@
+// Ekran wyboru dalszego kroku po ukończeniu quizu.
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { AnimatePresence, motion, MotionConfig } from "motion/react";

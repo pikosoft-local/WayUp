@@ -1,3 +1,4 @@
+// Schemat Zod opisujący profil zwrócony przez model AI.
 import { z } from 'zod';
 
 export const TRAIT_KEYS = [

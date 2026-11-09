@@ -1,3 +1,4 @@
+// Hook pozwalający komponentom korzystać z kontekstu autoryzacji.
 import { useContext } from "react";
 import { AuthContext } from "./authContext";
 

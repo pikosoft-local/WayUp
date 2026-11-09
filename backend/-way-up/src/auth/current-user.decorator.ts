@@ -1,3 +1,4 @@
+// Dekorator ułatwiający pobieranie aktualnego użytkownika w kontrolerach.
 import { createParamDecorator, ExecutionContext } from '@nestjs/common';
 import { AuthenticatedRequest, AuthUser } from './auth.types';
 

@@ -1,3 +1,4 @@
+// Funkcje przygotowujące odpowiedzi quizu do kontekstu mentora AI.
 import type { StoredAnswer } from '../quiz/quiz.types';
 
 export function formatStoredAnswers(answers: StoredAnswer[]): string {

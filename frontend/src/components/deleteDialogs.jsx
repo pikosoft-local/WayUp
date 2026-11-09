@@ -1,3 +1,4 @@
+// Reużywalne dialogi proszące o potwierdzenie nieodwracalnej operacji.
 import { useState } from "react";
 import {
   Alert,
@@ -20,6 +21,7 @@ const CONFIRMATION_WORD = "USUŃ";
 const dialogSlotProps = { paper: { className: "delete-dialog" } };
 
 function clearLocalDrafts() {
+  // Po usunięciu konta usuwamy także lokalne szkice quizu z tej przeglądarki.
   try {
     Object.keys(sessionStorage)
       .filter((key) => key.startsWith(DRAFT_KEY_PREFIX))
@@ -74,6 +76,7 @@ export function DeleteAccountDialog({ onClose }) {
   const busy = phase === "busy";
   const done = phase === "done";
 
+  // Wysyłamy żądanie usunięcia dopiero po wpisaniu dokładnego słowa potwierdzenia.
   async function handleDelete() {
     if (!confirmed || busy) return;
     setPhase("busy");
@@ -88,6 +91,7 @@ export function DeleteAccountDialog({ onClose }) {
     }
   }
 
+  // Po zakończeniu usuwania wracamy na stronę główną i kończymy lokalną sesję.
   async function handleFinish() {
     navigate("/", { replace: true });
     try {

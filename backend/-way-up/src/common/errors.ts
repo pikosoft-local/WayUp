@@ -1,3 +1,4 @@
+// Własne błędy aplikacji, używane do rozróżniania typowych problemów.
 import {
   BadRequestException,
   HttpException,

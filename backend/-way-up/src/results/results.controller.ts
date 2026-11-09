@@ -1,3 +1,4 @@
+// Endpointy wyników: odczyt, porównanie, analiza luk, PDF i udostępnianie.
 import { Controller, Delete, Get, Param, Post, Query, Res, UseGuards } from '@nestjs/common';
 import type { Response } from 'express';
 import { AuthGuard } from '../auth/auth.guard';

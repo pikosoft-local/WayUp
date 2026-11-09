@@ -1,3 +1,4 @@
+// Moduł quizu.
 import { Module } from '@nestjs/common';
 import { AiModule } from '../ai/ai.module';
 import { ProfileService } from '../profile/profile.service';

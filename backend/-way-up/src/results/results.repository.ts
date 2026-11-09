@@ -1,3 +1,4 @@
+// Repozytorium wyników. Odpowiada za odczyt i zapis danych w Supabase.
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { PostgrestError } from '@supabase/supabase-js';
 import type { Profile } from '../profile/profile.schema';

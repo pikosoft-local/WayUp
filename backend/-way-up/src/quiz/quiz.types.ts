@@ -1,3 +1,4 @@
+// Typy danych przesyłanych podczas wypełniania quizu.
 import type { Profile } from '../profile/profile.schema';
 import type { Question } from '../questions/questions.types';
 

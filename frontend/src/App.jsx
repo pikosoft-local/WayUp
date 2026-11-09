@@ -1,3 +1,4 @@
+// Główny komponent aplikacji. Definiuje routing i ekrany dostępne dla użytkownika.
 import { lazy, Suspense } from "react";
 import "./App.css";
 import { BrowserRouter, Routes, Route } from "react-router-dom";

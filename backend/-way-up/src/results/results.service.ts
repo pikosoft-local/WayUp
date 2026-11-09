@@ -1,3 +1,4 @@
+// Logika biznesowa wyników quizu i ich publicznego udostępniania.
 import { Injectable } from '@nestjs/common';
 import { randomBytes } from 'node:crypto';
 import { badRequest, notFound } from '../common/errors';

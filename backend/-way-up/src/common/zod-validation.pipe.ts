@@ -1,3 +1,4 @@
+// Pipe sprawdzający dane wejściowe według schematów Zod.
 import { Injectable, PipeTransform } from '@nestjs/common';
 import { z } from 'zod';
 import { badRequest } from './errors';

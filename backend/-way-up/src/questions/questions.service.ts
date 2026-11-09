@@ -1,3 +1,4 @@
+// Serwis generujący pytania dynamiczne i pytania uzupełniające.
 import { Injectable, Logger, ServiceUnavailableException } from "@nestjs/common";
 import { AiOverloadedException, GroqService } from "../ai/groq.service";
 import { extractJson } from "../ai/extract-json";

@@ -1,3 +1,4 @@
+// Wspólny klient HTTP do komunikacji frontendu z backendem.
 import axios from "axios";
 import { supabase } from "./auth/supabaseClient";
 

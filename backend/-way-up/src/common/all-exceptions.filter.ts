@@ -1,3 +1,4 @@
+// Wspólny filtr zamieniający wyjątki backendu na jednolite odpowiedzi HTTP.
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import { Response } from 'express';
 

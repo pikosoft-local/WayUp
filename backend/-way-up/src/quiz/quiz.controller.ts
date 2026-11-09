@@ -1,3 +1,4 @@
+// Endpoint przyjmujący odpowiedzi quizu i uruchamiający generowanie profilu.
 import {
   Body,
   Controller,

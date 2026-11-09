@@ -1,3 +1,4 @@
+// Serwis wyliczający różnice między aktualnym profilem a wybraną ścieżką.
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { ResultsRepository } from './results.repository';
 

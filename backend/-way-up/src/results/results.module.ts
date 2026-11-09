@@ -1,3 +1,4 @@
+// Moduł obsługujący zapisane wyniki quizu.
 import { Module } from '@nestjs/common';
 import { ResultsController, ShareController, CompareController } from './results.controller';
 import { ResultsService } from './results.service';

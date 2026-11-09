@@ -1,13 +1,21 @@
+// Instrukcja systemowa dla mentora AI oraz typ danych, które mentor dostaje o użytkowniku.
 import type { Profile } from '../profile/profile.schema';
 
 interface MentorContext {
+  // Wybrana ścieżka zawodowa użytkownika.
   path: Profile['paths'][number];
+  // Archetyp opisujący mocne strony użytkownika.
   archetype: Profile['archetype'];
+  // Umiejętności twarde i miękkie pasujące do profilu.
   skills: Profile['skills'];
+  // Proponowany plan rozwoju na pierwsze trzy miesiące.
   roadmap: Profile['roadmap'];
+  // Odpowiedzi z quizu, które pomagają mentorowi odpowiadać osobiście.
   answers: string;
 }
 
+// Buduje długi prompt systemowy przekazywany do modelu przed rozmową.
+// Prompt mówi modelowi, jaką ma rolę, jaki ma mieć ton i jakich zasad ma pilnować.
 export function mentorSystemPrompt({ path, archetype, skills, roadmap, answers }: MentorContext) {
   return `Jesteś AI-mentorem od ścieżki zawodowej: "${path.title}". Rozmawiasz z nastolatkiem, który właśnie zrobił quiz zawodowy i chce dowiedzieć się więcej o tej ścieżce.
 

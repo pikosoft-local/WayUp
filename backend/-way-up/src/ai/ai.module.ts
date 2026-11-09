@@ -1,3 +1,4 @@
+// Moduł integracji ze sztuczną inteligencją.
 import { Module } from '@nestjs/common';
 import { GroqService } from './groq.service';
 

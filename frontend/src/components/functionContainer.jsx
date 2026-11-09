@@ -1,3 +1,4 @@
+// Kontener wizualny używany do grupowania zawartości ekranów aplikacji.
 import React from "react";
 import {
   Checkbox,

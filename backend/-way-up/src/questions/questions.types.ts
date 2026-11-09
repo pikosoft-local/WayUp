@@ -1,3 +1,4 @@
+// Typy opisujące pytania i ich możliwe warianty odpowiedzi.
 export type QuestionType = 'text' | 'choice' | 'multi' | 'slider';
 
 export interface QuestionOption {

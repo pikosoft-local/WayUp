@@ -1,3 +1,4 @@
+// Guard ograniczający liczbę żądań, aby chronić endpointy przed spamem.
 import { CanActivate, ExecutionContext, Injectable, SetMetadata } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { tooManyRequests } from './errors';
@@ -13,6 +14,7 @@ const RATE_LIMIT_KEY = 'rate-limit';
 export const RateLimit = (options: RateLimitOptions) => SetMetadata(RATE_LIMIT_KEY, options);
 
 const buckets = new Map<string, number[]>();
+// Po przekroczeniu tej liczby kluczy usuwamy stare wpisy z pamięci.
 const SWEEP_THRESHOLD = 5000;
 
 export interface ConsumeResult {
@@ -21,6 +23,7 @@ export interface ConsumeResult {
 }
 
 export function consume(key: string, limit: number, windowMs: number, now = Date.now()): ConsumeResult {
+  // Zostawiamy tylko żądania z aktualnego okna czasowego.
   const hits = (buckets.get(key) ?? []).filter((t) => now - t < windowMs);
 
   if (hits.length >= limit) {
@@ -44,6 +47,7 @@ export function resetRateLimits(): void {
 }
 
 function clientIp(req: any): string {
+  // Za proxy prawdziwy adres klienta jest zwykle w x-forwarded-for.
   const forwarded = req.headers?.['x-forwarded-for'];
   const first = (Array.isArray(forwarded) ? forwarded[0] : forwarded)?.split(',')[0]?.trim();
   return first || req.ip || req.socket?.remoteAddress || 'unknown';
@@ -54,6 +58,7 @@ export class RateLimitGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
 
   canActivate(context: ExecutionContext): boolean {
+    // Brak dekoratora oznacza, że dany endpoint nie ma limitu.
     const options = this.reflector.get<RateLimitOptions | undefined>(RATE_LIMIT_KEY, context.getHandler());
     if (!options) return true;
 

@@ -1,3 +1,4 @@
+// Serwis pobierający RSS-y i zamieniający je na krótkie aktualności z pomocą AI.
 import {
   Injectable,
   InternalServerErrorException,

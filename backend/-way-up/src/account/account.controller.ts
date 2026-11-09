@@ -1,3 +1,4 @@
+// Endpointy konta użytkownika, na przykład usuwanie własnego konta.
 import { Body, Controller, Delete, Param, UseGuards } from '@nestjs/common';
 import { z } from 'zod';
 import { AuthGuard } from '../auth/auth.guard';

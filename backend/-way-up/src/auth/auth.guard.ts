@@ -1,3 +1,4 @@
+// Guard sprawdzający, czy żądanie pochodzi od zalogowanego użytkownika.
 import {
   CanActivate,
   ExecutionContext,

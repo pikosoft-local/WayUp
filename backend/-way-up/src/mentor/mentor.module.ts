@@ -1,3 +1,4 @@
+// Moduł mentora. Łączy endpointy, serwis, repozytorium i integrację z AI.
 import { Module } from '@nestjs/common';
 import { AiModule } from '../ai/ai.module';
 import { ResultsModule } from '../results/results.module';

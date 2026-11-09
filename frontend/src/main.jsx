@@ -1,3 +1,4 @@
+// Punkt startowy frontendu. Montuje aplikację React w elemencie root dokumentu.
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'

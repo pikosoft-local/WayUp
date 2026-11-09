@@ -1,3 +1,4 @@
+// Funkcje porównujące profil zapisany w bazie z profilem publicznie udostępnionym.
 import { Profile, TRAIT_KEYS, TRAIT_LABELS, TraitKey } from '../profile/profile.schema';
 
 export interface TraitComparison {

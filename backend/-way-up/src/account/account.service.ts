@@ -1,3 +1,4 @@
+// Logika operacji wykonywanych na koncie użytkownika.
 import { Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { notFound } from '../common/errors';
 import { MentorRepository } from '../mentor/mentor.repository';
@@ -14,6 +15,8 @@ export class AccountService {
     private readonly mentor: MentorRepository,
   ) {}
 
+  // Usuwamy tylko wynik należący do wskazanego użytkownika.
+  // Najpierw kasujemy zależne wiadomości mentora, żeby nie zostały osierocone rekordy.
   async deleteResult(userId: string, resultId: string): Promise<void> {
     const owned = await this.results.findOwned(resultId, userId);
     if (!owned) throw notFound('Nie znaleziono wyniku.');
@@ -25,6 +28,7 @@ export class AccountService {
     this.logger.log(`Usunięto wynik ${resultId} (user=${userId})`);
   }
 
+  // Usuwamy wszystkie dane użytkownika, a na końcu jego konto w Supabase Auth.
   async deleteAccount(userId: string): Promise<void> {
     await this.mentor.deleteAllByUser(userId);
     const removedResults = await this.results.deleteAllByUser(userId);

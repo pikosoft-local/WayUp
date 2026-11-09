@@ -1,3 +1,4 @@
+// Ekran konta użytkownika: profil, wyniki, ustawienia prywatności i usuwanie danych.
 import { useState } from "react";
 import { Alert, Button, CircularProgress } from "@mui/material";
 import GoogleIcon from "@mui/icons-material/Google";

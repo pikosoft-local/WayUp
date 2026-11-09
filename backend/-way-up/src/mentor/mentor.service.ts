@@ -1,3 +1,4 @@
+// Logika rozmowy z mentorem AI, w tym zwykłe odpowiedzi i streaming.
 import { Injectable, Logger } from '@nestjs/common';
 import { ChatMessage, GroqService } from '../ai/groq.service';
 import { badRequest, notFound, tooManyRequests } from '../common/errors';

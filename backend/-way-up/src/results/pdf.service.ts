@@ -1,3 +1,4 @@
+// Serwis tworzący estetyczny raport PDF z profilem użytkownika.
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ResultsRepository } from './results.repository';
 import PDFDocument from 'pdfkit';

@@ -1,3 +1,4 @@
+// Serwis komunikujący backend z modelem AI dostępnym przez Groq.
 import { Injectable, Logger, ServiceUnavailableException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Groq from 'groq-sdk';
